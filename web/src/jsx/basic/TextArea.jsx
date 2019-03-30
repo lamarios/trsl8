@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 const MyInput = styled.textarea`
- //all: unset;
+ all: unset;
  border: 1px solid ${props => props.theme.colors.complementary.Neutral};
  margin: 2px;
 display: block;

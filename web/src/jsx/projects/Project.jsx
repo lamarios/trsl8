@@ -34,7 +34,6 @@ min-width: 100%;
      }
      thead{
       background-color: ${props => props.theme.colors.complementary.Neutral};
-      position: sticky;
      } 
 `;
 
@@ -299,16 +298,19 @@ export default class Project extends React.Component {
                             this.service.getLanguages(project.ID)
                                 .then(res => {
 
-                                    let filteredLanguages = [];
-                                    if (res.length >= 1) {
-                                        filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
-                                    }
-
-                                    this.setState({languages: res, filteredLanguages: filteredLanguages}, () => {
-                                        if (getFiles) {
-                                            this.state.filteredLanguages.forEach(l => this.getFiles(l));
+                                    if(this.state.filteredLanguages.length == 0) {
+                                        let filteredLanguages = [];
+                                        if (res.length >= 1) {
+                                            filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
                                         }
-                                    });
+
+
+                                        this.setState({languages: res, filteredLanguages: filteredLanguages}, () => {
+                                            if (getFiles) {
+                                                this.state.filteredLanguages.forEach(l => this.getFiles(l));
+                                            }
+                                        });
+                                    }
                                 });
                         });
                     });
@@ -370,7 +372,7 @@ export default class Project extends React.Component {
                                                 <Loading/>
                                             </TranslationLoading>
                                         }else{
-                                            return <td></td>;
+                                            return null;
                                         }
                                     } else {
                                         return <StringCell key={l}

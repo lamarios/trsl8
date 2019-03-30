@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import TextArea from "../basic/TextArea";
 import Loading from "../basic/Loading";
 import Service from "../Service";
+import TextInput from "../basic/TextInput";
 
 const StringInput = styled(TextArea)`
 min-width: 150px;

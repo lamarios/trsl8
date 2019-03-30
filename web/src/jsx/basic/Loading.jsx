@@ -7,31 +7,31 @@ import { faCloud } from '@fortawesome/free-solid-svg-icons'
 const Fading = keyframes`
 0%{
   transform: scale(0.7);
-  opacity: 0.7;
+  opacity: 1;
 }
 
 10%{
   transform: scale(1);
-  opacity: 1;
+  opacity: 0.7;
 }
 20%{
   transform: scale(0.7);
-  opacity: 0.7;
+  opacity: 1;
 }
 30%{
   transform: scale(1);
-  opacity: 1;
+  opacity: 0.7;
 }
 
 100%{
   transform: scale(0.7);
-  opacity: 0.7;
+  opacity: 1;
 }
 `;
 
 const Icon = styled(FontAwesomeIcon)`
 padding:5px;
-    color: ${props => props.theme.colors.primary.main};
+    color: ${props => props.theme.colors.complementary.Light};
     animation: ${Fading} ease 1.5s  infinite;
 `;
 
