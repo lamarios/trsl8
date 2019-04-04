@@ -31,7 +31,7 @@ const Fading = keyframes`
 
 const Icon = styled(FontAwesomeIcon)`
 padding:5px;
-    color: ${props => props.theme.colors.complementary.Light};
+    color: ${props => props.theme.colors.primary.dark};
     animation: ${Fading} ease 1.5s  infinite;
 `;
 

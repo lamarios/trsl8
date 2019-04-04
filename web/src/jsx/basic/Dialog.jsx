@@ -20,7 +20,7 @@ const Button = styled.button`
   background:none;
   cursor: pointer;
 border: none;
-color: ${props => props.theme.colors.text}; 
+color: ${props => props.theme.colors.text.main}; 
 font-size: 20px;
 `;
 

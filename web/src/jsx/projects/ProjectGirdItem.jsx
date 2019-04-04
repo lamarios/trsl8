@@ -1,38 +1,25 @@
 import React from 'react';
 import styled from 'styled-components';
-import {fadeIn} from "../animations";
 import {NavLink} from 'react-router-dom'
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
+import {faFileAlt, faTimes} from '@fortawesome/free-solid-svg-icons'
 
 const Link = styled(NavLink)`
-background-color: ${props => props.theme.colors.complementary.NeutralLight};
-width:100px;
-height:100px;
-margin:10px;
-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-border-radius: 5px;
-padding:20px;
+display: block;
+width: 100%;
 transition:  all 0.25s ease;
 cursor:pointer;
+text-decoration: none;
+color: ${props => props.theme.colors.text.main};
+`;
+
+const Icon = styled(FontAwesomeIcon)`
+color: ${props => props.theme.colors.primary.light};
+`;
 
 
-display: flex;
-justify-content: center;
-align-items: center;
- 
- animation: ${fadeIn} 0.25s ease;
- 
-    text-decoration: none;
-    color: ${props => props.theme.colors.primary.main};
- 
- &:hover{
-  background-color: ${props => props.theme.colors.primary.Light};
-  transform: scale(1.05);
-    color: ${props => props.theme.colors.complementary.main};
- }
- 
-display: flex;
-justify-content: center;
-align-items: center;
+const Actions = styled.div`
+text-align: right;
 `;
 
 export default class ProjectGirdItem extends React.Component {
@@ -43,8 +30,16 @@ export default class ProjectGirdItem extends React.Component {
 
 
     render() {
-        return (<Link to={"/projects/" + this.props.project.ID}>
-            {this.props.project.Name}
-        </Link>);
+
+        const projectLink = "/projects/" + this.props.project.ID;
+
+        return (<tr>
+            <td>
+                <Link to={projectLink}>
+                    <Icon icon={faFileAlt}/>&nbsp;
+                    {this.props.project.Name}
+                </Link>
+            </td>
+        </tr>);
     }
 }

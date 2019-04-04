@@ -87,15 +87,7 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 }
 
 func GetProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	projectId, err := strconv.ParseUint(vars["project"], 10, 32)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't parse project Id")
-		return
-	}
-
-	project, err := dao.GetProject(user, uint(projectId))
+	project, err := GetProjectForUser(user, true, w, r)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't get project")
 		return
@@ -104,7 +96,7 @@ func GetProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 	ToJson(&project, w)
 }
 func GetProjectLanguagesHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, err := GetProjectForUser(user, w, r)
+	project, err := GetProjectForUser(user, true, w, r)
 	if err != nil {
 		WebError(w, err, 500, "Something went wrong when getting project")
 		return
@@ -143,7 +135,7 @@ func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(project.Username) == 0 && len(project.Password) == 0 && !project.Ssh {
-		WebError(w, errors.New("Username or password empty empty"), 500, "")
+		WebError(w, errors.New("Email or password empty empty"), 500, "")
 		return
 	}
 
@@ -193,7 +185,7 @@ func GetProjectStatusHandler(user dao.UserFull, w http.ResponseWriter, r *http.R
 }
 
 func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, w, r)
+	project, e := GetProjectForUser(user, true, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		return
@@ -232,7 +224,7 @@ func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	commitChanges, err := git.CommitChanges(project, "["+user.Username+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
+	commitChanges, err := git.CommitChanges(project, "["+user.Email+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't commit changes")
 		return
@@ -248,7 +240,7 @@ func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 }
 
 func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, w, r)
+	project, e := GetProjectForUser(user, true, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		return
@@ -271,7 +263,7 @@ func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) 
 	ToJson(terms, w)
 
 }
-func GetProjectForUser(user dao.UserFull, w http.ResponseWriter, r *http.Request) (dao.Project, error) {
+func GetProjectForUser(user dao.UserFull, allowContributor bool, w http.ResponseWriter, r *http.Request) (dao.Project, error) {
 	vars := mux.Vars(r)
 
 	//getting project t osee if user can access
@@ -285,8 +277,23 @@ func GetProjectForUser(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		return dao.Project{}, err
 	}
 
-	if project.OwnerID != user.ID {
-		return dao.Project{}, err
+	isOwner := project.OwnerID == user.ID
+	if allowContributor {
+		isContributor := false
+		for _, contribution := range project.Users {
+			if contribution.UserId == user.ID {
+				isContributor = true
+			}
+		}
+
+		if !isOwner && !isContributor {
+			return dao.Project{}, errors.New("Not owner nor contributor")
+		}
+
+	} else {
+		if !isOwner {
+			return dao.Project{}, errors.New("Not the owner of the project")
+		}
 	}
 
 	return project, nil
@@ -296,7 +303,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 	var languageCode string
 	FromJson(r.Body, &languageCode)
 
-	project, e := GetProjectForUser(user, w, r)
+	project, e := GetProjectForUser(user, false, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		log.Print(e)
@@ -320,7 +327,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	commit, e := git.CommitChanges(project, "["+user.Username+"] add new language "+languageCode)
+	commit, e := git.CommitChanges(project, "["+user.Email+"] add new language "+languageCode)
 	if e != nil {
 		WebError(w, e, 500, "Error when creating new file")
 		log.Print(e)
@@ -333,7 +340,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 }
 
 func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, w, r)
+	project, e := GetProjectForUser(user, false, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		log.Print(e)
@@ -380,7 +387,7 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 
 	handler.UpdateString(file, term, "")
 
-	commitChanges, err := git.CommitChanges(project, "["+user.Username+"] update "+project.MainLanguage+": new term "+term)
+	commitChanges, err := git.CommitChanges(project, "["+user.Email+"] update "+project.MainLanguage+": new term "+term)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't commit")
 		return
@@ -392,7 +399,7 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 }
 
 func AddUserToProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, err := GetProjectForUser(user, w, r)
+	project, err := GetProjectForUser(user, false, w, r)
 	if err != nil {
 		WebError(w, err, 500, "")
 		return
@@ -423,7 +430,7 @@ func AddUserToProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.R
 }
 
 func RemoveUserFromProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, err := GetProjectForUser(user, w, r)
+	project, err := GetProjectForUser(user, false, w, r)
 	if err != nil {
 		WebError(w, err, 500, "")
 		return

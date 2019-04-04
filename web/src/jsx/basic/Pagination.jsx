@@ -14,7 +14,7 @@ const CurrentPage = styled(Page)`
 `;
 
 const Separator = styled.span`
-    color: ${props => props.theme.colors.text};
+    color: ${props => props.theme.colors.text.main};
 `;
 
 const Container = styled.div`

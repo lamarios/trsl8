@@ -12,7 +12,7 @@ export default class Login extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {username: '', password: '', error: ''};
+        this.state = {email: '', password: '', error: ''};
 
         this.service = new Service();
 
@@ -21,7 +21,7 @@ export default class Login extends React.Component {
 
 
     login() {
-        let login = {username: this.state.username, password: this.state.password};
+        let login = {email: this.state.email, password: this.state.password};
 
 
         this.service.login(login)
@@ -38,8 +38,8 @@ export default class Login extends React.Component {
             <Title>Sign In</Title>
             <div>
                 <div>
-                    <TextInput label="Username" id="username" type="text" value={this.state.username}
-                               onChange={(e) => this.setState({username: e.target.value})}/>
+                    <TextInput label="Email" id="email" type="text" value={this.state.email}
+                               onChange={(e) => this.setState({email: e.target.value})}/>
                 </div>
                 <div>
                     <TextInput label={"Password"} id="password" type="password" value={this.state.password}

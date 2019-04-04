@@ -6,7 +6,7 @@ import Service from './Service';
 import TextInput from "./basic/TextInput";
 
 const SetUp = styled.div`
-     color: ${props => props.theme.colors.text};    
+     color: ${props => props.theme.colors.text.primary};    
 
     `;
 
@@ -14,7 +14,7 @@ export default class SignUp extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {username: '', password: '', firstName: '', lastName: '',repeatPassword: '', passwordsMatch: true, error: ''};
+        this.state = {email: '', password: '', firstName: '', lastName: '',repeatPassword: '', passwordsMatch: true, error: ''};
 
         this.service = new Service();
 
@@ -29,7 +29,7 @@ export default class SignUp extends React.Component {
             this.setState({error: 'Password not matching'});
         } else{
             let user = {
-                username: this.state.username,
+                email: this.state.email,
                 password: this.state.password,
                 firstName: this.state.firstName,
                 lastName: this.state.lastName,
@@ -45,8 +45,8 @@ export default class SignUp extends React.Component {
         return (<SetUp>
             <Title>Sign Up</Title>
             <div>
-                <TextInput label="Username" id="username" type="text" value={this.state.username}
-                       onChange={(e) => this.setState({username: e.target.value})}/>
+                <TextInput label="Email" id="email" type="email" value={this.state.email}
+                       onChange={(e) => this.setState({email: e.target.value})}/>
             </div>
             <div>
                 <TextInput label="First name" id="firstName" type="text" value={this.state.firstName}

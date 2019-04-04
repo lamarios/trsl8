@@ -9,7 +9,7 @@ import (
 )
 
 type LoginForm struct {
-	Username string
+	Email    string
 	Password string
 }
 
@@ -39,9 +39,9 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 	user.Password = utils.Hash(user.Password)
 	log.Println(user.Password)
 
-	_, err := dao.GetUserByUsername(user.Username)
+	_, err := dao.GetUserByEmail(user.Email)
 	if err == nil {
-		WebError(w, errors.New("Username already taken"), 500, "")
+		WebError(w, errors.New("Email already taken"), 500, "")
 		return
 	}
 
@@ -65,15 +65,15 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	var form LoginForm
 	FromJson(r.Body, &form)
 
-	user, err := dao.GetUserByUsername(form.Username)
+	user, err := dao.GetUserByEmail(form.Email)
 	if err != nil {
-		WebError(w, err, 401, "Username/password combination incorrect")
+		WebError(w, err, 401, "Email/password combination incorrect")
 		return
 	}
 	password := utils.Hash(form.Password)
 
 	if user.Password != password {
-		WebError(w, err, 401, "Username/password combination incorrect")
+		WebError(w, err, 401, "Email/password combination incorrect")
 		return
 	}
 

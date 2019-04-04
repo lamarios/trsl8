@@ -13,7 +13,7 @@ const (
 
 type UserFull struct {
 	User
-	Username string
+	Email    string
 	Password string
 	Role     UserRole
 }
@@ -49,17 +49,17 @@ func CreateUser(user UserFull) (UserFull, error) {
 	return user, nil
 }
 
-func GetUserByUsername(username string) (UserFull, error) {
+func GetUserByEmail(email string) (UserFull, error) {
 	db := GetConnection()
 	defer db.Close()
 
 	var user UserFull
-	db.First(&user, "username = ?", username)
+	db.First(&user, "email = ?", email)
 
 	if user != (UserFull{}) {
 		return user, nil
 	} else {
-		return UserFull{}, errors.New("Username doesn't exist")
+		return UserFull{}, errors.New("Email doesn't exist")
 	}
 }
 
@@ -72,7 +72,7 @@ func GetUserById(id uint) (UserFull, error) {
 	if user != (UserFull{}) {
 		return user, nil
 	} else {
-		return UserFull{}, errors.New("Username doesn't exist")
+		return UserFull{}, errors.New("Email doesn't exist")
 	}
 }
 

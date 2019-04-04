@@ -14,12 +14,18 @@ const Option = styled.div`
 const Options = styled.div``;
 const Input = styled.div`
 cursor: pointer;
-border: 1px ${props => props.theme.colors.primary.NeutralDark} solid;
+ border: 1px solid ${props => props.theme.colors.inputBorder};
 border-radius: 5px;
 height:30px;
 display: flex;
 align-items: center;
 padding: 0 7px;
+
+  span {
+    display: block;
+    margin-right:5px;
+   }
+
 `;
 
 
@@ -71,7 +77,7 @@ export default class Select extends React.Component {
         return (<Container>
             {this.props.label !== undefined && <span>{this.props.label}:</span>}
 
-            <Input onClick={this.toggleDropDown}>
+            <Input onClick={this.toggleDropDown} className="input">
                 {this.props.value === undefined || this.props.value.length === 0? <span>Select</span>
                 : <span>{this.props.value}</span>}
                 <Chevron icon={faChevronDown}/></Input>

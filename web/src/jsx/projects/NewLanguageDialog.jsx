@@ -8,17 +8,19 @@ import Title from "../basic/Title";
 const Language = styled.div`
 cursor: pointer;
 padding: 5px;
-  color: ${props => props.theme.colors.text};
+  color: ${props => props.theme.colors.text.main};
   span{
   color: ${props => props.theme.colors.primary.main};
+  font-weight: bold;
   }
 `;
 
 const SelectedLanguage = styled(Language)`
-    background-color: ${props => props.theme.colors.complementary.main};
+    background-color: ${props => props.theme.colors.primary.lightest};
     color: white;
   span{
-  color: ${props => props.theme.colors.primary.main};
+  color: ${props => props.theme.colors.background};
+  
   }
 `;
 

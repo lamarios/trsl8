@@ -14,7 +14,7 @@ const Option = styled.div`
 const Options = styled.div``;
 const Input = styled.div`
 cursor: pointer;
-border: 1px ${props => props.theme.colors.primary.NeutralDark} solid;
+ border: 1px solid ${props => props.theme.colors.inputBorder};
 border-radius: 5px;
 height:30px;
 display: flex;

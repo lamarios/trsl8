@@ -20,7 +20,7 @@ const ENDPOINTS = {
             GET_TERM: '/api/projects/%s/terms',
             CREATE_LANGUAGE: '/api/projects/{id}/languages',
             GET_LANGUAGES: '/api/projects/%s/languages',
-            USERS:{
+            USERS: {
                 ADD: "/api/projects/{id}/users/{userId}",
             }
         },
@@ -63,7 +63,7 @@ export default class Service {
         }).then(this.getJsonNoLoginRedirect);
     }
 
-    getSelf(){
+    getSelf() {
         return fetch(ENDPOINTS.API.USERS.SELF, {
             headers: {
                 'Content-Type': 'application/json',
@@ -207,6 +207,7 @@ export default class Service {
             }
         }).then(this.getJson.bind(this))
     }
+
     /**
      * Creates a new  language
      * @param id
@@ -241,7 +242,7 @@ export default class Service {
      * @param search
      * @return {Promise<Response | never>}
      */
-    searchUser(search){
+    searchUser(search) {
         return fetch(ENDPOINTS.API.USERS.SEARCH, {
             method: 'POST', // or 'PUT'
             body: JSON.stringify(search),
@@ -258,7 +259,7 @@ export default class Service {
      * @param userId
      * @return {Promise<Response | never>}
      */
-    addUserToProject(projectId, userId){
+    addUserToProject(projectId, userId) {
         return fetch(ENDPOINTS.API.PROJECTS.USERS.ADD.replace("{id}", projectId).replace("{userId}", userId), {
             method: 'POST', // or 'PUT'
             headers: {
@@ -267,7 +268,7 @@ export default class Service {
         }).then(this.getJson.bind(this))
     }
 
-    removeUserFromProject(projectId, userId){
+    removeUserFromProject(projectId, userId) {
         return fetch(ENDPOINTS.API.PROJECTS.USERS.ADD.replace("{id}", projectId).replace("{userId}", userId), {
             method: 'DELETE', // or 'PUT'
             headers: {
@@ -276,7 +277,7 @@ export default class Service {
         }).then(this.getJson.bind(this))
     }
 
-    getJsonNoLoginRedirect(res){
+    getJsonNoLoginRedirect(res) {
         if (res.status === 200) {
             return res.json();
         } else {
@@ -289,5 +290,12 @@ export default class Service {
             window.location.href = '/login';
         }
         return this.getJsonNoLoginRedirect(res)
+    }
+
+    getUserData() {
+        const token = window.localStorage.getItem("token");
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        return JSON.parse(window.atob(base64)).Data.User;
     }
 }

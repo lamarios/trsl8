@@ -21,7 +21,7 @@ const UserIcon = styled.div`
   align-items: center;
   border-radius: 50%;
  margin: 0 10px; 
-  background-color: ${props => props.theme.colors.complementary.NeutralDark};
+  background-color: ${props => props.theme.colors.primary.NeutralDark};
 `;
 
 const UserName = styled.div``;

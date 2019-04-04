@@ -4,12 +4,18 @@ import styled from 'styled-components'
 
 const Button = styled.button`
    all: unset;
-  color: ${props => props.theme.colors.primary.main};
-  background-color: ${props =>props.theme.colors.background};
-  border: 2px solid ${props => props.theme.colors.primary.NeutralDark};
+  color: ${props => props.theme.colors.background};
+  background-color: ${props =>props.theme.colors.primary.main};
   border-radius: 5px;
   cursor:pointer;
-  padding: 3px 5px;
+  padding: 7px 12px;
+  transition: all 0.25s ease-in; 
+  display: flex;
+  align-items: center;
+  
+  &:hover{
+    background-color: ${props =>props.theme.colors.primary.lightest};
+  }
 `;
 
 export default class PrimaryButton extends React.Component {

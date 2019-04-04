@@ -29,7 +29,7 @@ func GetAllProjects(user UserFull) []Project {
 
 	var projects []Project
 
-	db.Preload("Users").Preload("Owner").Find(&projects, "owner_id = ?", user.ID)
+	db.Preload("Users").Preload("Owner").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("owner_id = ?", user.ID).Or("p.user_id = ?", user.ID).Find(&projects)
 
 	return projects
 }
@@ -40,7 +40,7 @@ func GetProject(user UserFull, id uint) (Project, error) {
 
 	var project Project
 
-	db.Preload("Owner").Preload("Users").Preload("Users.User").Where("owner_id = ? AND id = ?", user.ID, id).First(&project)
+	db.Preload("Owner").Preload("Users").Preload("Users.User").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("(owner_id = ? OR p.user_id = ?) AND projects.id = ?", user.ID, user.ID, id).First(&project)
 
 	return project, nil
 }

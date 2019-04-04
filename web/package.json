@@ -18,7 +18,7 @@
     "react": "^16.8.4",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.8.4",
-    "react-router-dom": "^4.4.0",
+    "react-router-dom": "^5.0.0",
     "sprintf-js": "^1.1.2",
     "styled-components": "^4.1.3"
   }

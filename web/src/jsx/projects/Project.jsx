@@ -17,33 +17,34 @@ import NewLanguageDialog from "./NewLanguageDialog";
 import ProjectUsers from "./ProjectUsers";
 import Select from "../basic/Select";
 import StringCell from "./StringCell";
+import LanguageSelector from "./LanguageSelector";
+
+
+const TitleBar = styled.div`
+  display: flex;
+`;
+
+const ProjectTitle = styled(Title)`
+flex-grow: 1;
+`;
 
 const TranslationContainer = styled.table`
-  border-collapse: collapse;
-min-width: 100%;
+    unset:all;
+    border-spacing: 0 0;
+    border-collapse: collapse;
+    min-width: 100%;
     border:none;
-      th, tr, td {
-      border:none;
-      margin:0;
-      }
-     tbody > tr{
-        transition: all 0.25s ease-in-out;
-        &:hover{
-          background-color: ${props => props.theme.colors.complementary.NeutralLight};
+    
+    thead{
+        tr > th {
+            text-align: left;
+            border-bottom: 1px solid ${props => props.theme.colors.text.light};
         }
-     }
-     thead{
-      background-color: ${props => props.theme.colors.complementary.Neutral};
-     } 
+    } 
 `;
 
-const TableHead = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
 
-const NewLanguageButton = styled(FontAwesomeIcon)`
+const NewLanguageButton = styled(PrimaryButton)`
 cursor: pointer;
 `;
 
@@ -65,11 +66,6 @@ position: relative;
 const TranslationLoading = styled.td`
 font-size: 80px;
 text-align: center;
-`;
-
-
-const RemoveLanguage = styled(FontAwesomeIcon)`
-cursor: pointer;
 `;
 
 
@@ -291,30 +287,38 @@ export default class Project extends React.Component {
 
 
         this.service.getProject(this.props.match.params.id)
-            .then(project => this.setState({project: project}, () => {
-                this.service.getProjectTerms(project.ID)
-                    .then(terms => {
-                        this.setState({terms: terms, renderedTerms: this.filterTerms(terms)}, () => {
-                            this.service.getLanguages(project.ID)
-                                .then(res => {
+            .then(project => {
+                this.setState({project: project}, () => {
+                    //adding flag to make life easier
+                    project.isOwner = this.service.getUserData().ID === project.OwnerID;
 
-                                    if(this.state.filteredLanguages.length == 0) {
-                                        let filteredLanguages = [];
-                                        if (res.length >= 1) {
-                                            filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
-                                        }
+                    this.service.getProjectTerms(project.ID)
+                        .then(terms => {
+                            this.setState({terms: terms, renderedTerms: this.filterTerms(terms)}, () => {
+                                this.service.getLanguages(project.ID)
+                                    .then(res => {
 
-
-                                        this.setState({languages: res, filteredLanguages: filteredLanguages}, () => {
-                                            if (getFiles) {
-                                                this.state.filteredLanguages.forEach(l => this.getFiles(l));
+                                        if (this.state.filteredLanguages.length == 0) {
+                                            let filteredLanguages = [];
+                                            if (res.length >= 1) {
+                                                filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
                                             }
-                                        });
-                                    }
-                                });
+
+
+                                            this.setState({
+                                                languages: res,
+                                                filteredLanguages: filteredLanguages
+                                            }, () => {
+                                                if (getFiles) {
+                                                    this.state.filteredLanguages.forEach(l => this.getFiles(l));
+                                                }
+                                            });
+                                        }
+                                    });
+                            });
                         });
-                    });
-            }));
+                })
+            });
     }
 
     render() {
@@ -323,11 +327,17 @@ export default class Project extends React.Component {
 
         return (<div>
             {this.state.project !== undefined && <div>
-                <Title>{this.state.project.Name}</Title>
-                <ProjectUsers project={this.state.project} onUsersChanged={() => this.getProject(false)}/>
+                <TitleBar>
+                    <ProjectTitle>
+                        {this.state.project.Name}
+                    </ProjectTitle>
+                    <ProjectUsers project={this.state.project} onUsersChanged={() => this.getProject(false)}/>
+                </TitleBar>
+                <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
+                    <FontAwesomeIcon icon={faPlus}/>
+                    &nbsp;Add new language
+                </NewLanguageButton>
                 <Filters>
-                    <div>Languages:</div>
-                    <NewLanguageButton icon={faPlus} onClick={() => this.setState({showNewLanguageDialog: true})}/>
                     <div>Filter:</div>
                     <TextInput id={"filter"} value={this.state.filter}
                                onChange={(e) => this.setState({
@@ -342,22 +352,21 @@ export default class Project extends React.Component {
                               }, () => this.renderPage())}/>
                 </Filters>
 
-                <TableContainer>
-                    <TranslationContainer>
-                        <thead>
-                        <tr>
-                            <th>Terms</th>
-                            {languages.map((lang, index) =>
-                                <th key={lang}>
-                                    <TableHead>
-                                        <Select value={lang}
-                                                options={this.state.languages.filter(s => languages.indexOf(s) === -1)}
-                                                onChange={(value) => this.changeFilteredLanguages(value, index)}/>
-                                        {languages.length > 1 &&
-                                        <RemoveLanguage icon={faTimes} onClick={() => this.removeLanguage(lang)}/>}
-                                    </TableHead>
-                                </th>
-                            )}
+                < TableContainer>
+                    < TranslationContainer>
+                        < thead>
+                        < tr>
+                            < th> Terms < /th>
+                                {languages.map((lang, index) =>
+                                    <LanguageSelector key={lang}
+                                                      value={lang}
+
+                                                      options={this.state.languages.filter(s => languages.indexOf(s) === -1)}
+                                                      onChange={(value) => this.changeFilteredLanguages(value, index)}
+                                                      showRemove={languages.length > 1}
+                                                      onRemove={(lang) => this.removeLanguage(lang)}
+                                    />
+                                )}
                         </tr>
                         </thead>
                         <tbody>
@@ -367,11 +376,11 @@ export default class Project extends React.Component {
                                     if (this.state.languageLoadings[l] !== undefined
                                         && this.state.languageLoadings[l] === true
                                     ) {
-                                        if(index === 0) {
+                                        if (index === 0) {
                                             return <TranslationLoading key={l} rowSpan={this.state.renderedTerms.length}>
                                                 <Loading/>
                                             </TranslationLoading>
-                                        }else{
+                                        } else {
                                             return null;
                                         }
                                     } else {
@@ -407,14 +416,14 @@ export default class Project extends React.Component {
                 </TableContainer>
             </div>}
 
-            {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
-                {this.state.errorMessage}
-            </OkDialog>}
-            {this.state.showNewLanguageDialog &&
-            <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
-                               addLanguage={this.addLanguage}
-                               existingLanguages={Object.keys(this.state.translations)}/>}
-        </div>)
-    }
+                {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
+                    {this.state.errorMessage}
+                </OkDialog>}
+                {this.state.showNewLanguageDialog &&
+                <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
+                                   addLanguage={this.addLanguage}
+                                   existingLanguages={Object.keys(this.state.translations)}/>}
+                </div>)
+                }
 
-}
+                }

@@ -189,7 +189,7 @@ export default class NewProjectDialog extends React.Component {
                 <TextInput label="User name" id="git-username" value={this.state.username}
                            onChange={(e) => this.setState({username: e.target.value})}/>
 
-                <TextInput label="Password" type="git-password" id="repo-url" value={this.state.password}
+                <TextInput label="Password" type="password" id="git-password" value={this.state.password}
                            onChange={(e) => this.setState({password: e.target.value})}/>
 
             </div>}

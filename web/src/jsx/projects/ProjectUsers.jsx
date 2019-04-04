@@ -90,18 +90,22 @@ export default class ProjectUsers extends React.Component {
                 </PanelTitle>
                 <Users>
                     {project.Users.map((u) => {
-                        const actions = [{
-                            icon: faTimes,
-                            name: 'remove',
-                            onClick: () => this.removeUser(u.User.ID)
-                        }];
+                        let actions = [];
+                        if (project.isOwner ) {
+                            actions = [{
+                                icon: faTimes,
+                                name: 'remove',
+                                onClick: () => this.removeUser(u.User.ID)
+                            }];
+                        }
+
                         return <UserPill key={u.ID} user={u.User} actions={actions}/>
                     })}
                 </Users>
-                <div>
+                {project.isOwner && <div>
                     Add contributors:
                     <AutoComplete getOptionsPromise={this.getAutoCompleteValues} onSelected={this.addUser}/>
-                </div>
+                </div>}
             </SidePanel>}
         </div>);
     }

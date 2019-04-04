@@ -6,7 +6,7 @@ const Container = styled.div`
  box-shadow: 0 0 200px rgba(0,0,0,1);
  animation: ${slideFromRight} 0.25s;
  position: fixed;
- background-color: ${props=> props.theme.colors.complementary.main};
+ background-color: ${props=> props.theme.colors.primary.main};
  padding:30px;
  z-index: 100;
  top:0;
