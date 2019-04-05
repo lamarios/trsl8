@@ -14,7 +14,7 @@ const ENDPOINTS = {
             GET_ALL: "/api/projects",
             TEST: "/api/projects/test",
             GET: "/api/projects/{id}",
-            GET_STRINGS: "/api/projects/%s/strings/%s",
+            GET_STRINGS: "/api/projects/%s/strings/all",
             UPDATE_STRINGS: "/api/projects/%s/strings",
             CREATE_TERM: "/api/projects/{id}/terms",
             GET_TERM: "/api/projects/%s/terms",
@@ -112,8 +112,10 @@ export default class Service {
      * @param id
      * @return {Promise<Response | never>}
      */
-    getProjectStrings(id, language1) {
-        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_STRINGS, id, language1), {
+    getProjectStrings(id, request) {
+        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_STRINGS, id), {
+            method: "POST", // or "PUT"
+            body: JSON.stringify(request), // data can be `string` or {object}!
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
@@ -288,7 +290,7 @@ export default class Service {
 
     getJson(res) {
         if (res.status === 401) {
-            window.location.href = "/login";
+            window.location.href = "/sign-in";
         }
         return this.getJsonNoLoginRedirect(res)
     }

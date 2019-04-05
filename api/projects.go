@@ -11,6 +11,7 @@ import (
 	"github.com/rs/xid"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,6 +30,23 @@ type UpdateString struct {
 type ProjectStatus struct {
 }
 
+type StringRequest struct {
+	MissingOnly bool
+	Filter      string
+	Languages   []string
+	Page        int
+	PageSize    int
+}
+
+type StringResponse struct {
+	Page         int
+	Total        int
+	PageSize     int
+	Terms        []string
+	Translations map[string]map[string]string
+	Progress     map[string]int
+}
+
 var (
 	projectPushMap = make(map[uint]xid.ID)
 )
@@ -40,39 +58,109 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 		return
 	}
 
+	var request StringRequest
+	FromJson(r.Body, &request)
+
 	err = git.Pull(project)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't pull lastest changes")
 		return
 	}
 
-	fileContent := make(map[string]string)
+	handler := fileHandlers.GetHandler(project.FileType)
 
-	fileHandler := fileHandlers.GetHandler(project.FileType)
-	languages := fileHandler.GetLanguages(project)
+	terms, err := handler.GetTerms(project)
 	if err != nil {
-		WebError(w, err, 500, "Couldn't get project languages")
+		WebError(w, err, 500, "Couldn't get the terms")
 		return
 	}
 
-	vars := mux.Vars(r)
+	sort.Strings(terms)
 
-	language1 := vars["language"]
+	var filteredTerms []string
+	var allTranslations = make(map[string]map[string]string)
+	var translations = make(map[string]map[string]string)
+	var progress = make(map[string]int)
 
-	for _, language := range languages {
+	// Getting all the translations and progress
+	for _, language := range request.Languages {
 
-		if language == language1 {
-			content, err := fileHandler.GetStrings(project, language)
-			if err == nil {
-				// probably empty file
-				fileContent = content
-			} else {
-				fileContent = make(map[string]string)
+		langStrings, err := handler.GetStrings(project, language)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't get the translations")
+			return
+		}
+
+		allTranslations[language] = langStrings
+
+		//counting total
+		count := 0
+		for _, s := range langStrings {
+			if len(s) > 0 {
+				count++
 			}
+		}
+		progress[language] = count * 100 / len(terms)
+	}
+
+	// now getting based on each term
+	for _, term := range terms {
+
+		if strings.Contains(term, request.Filter) {
+
+			termTrans := make(map[string]string)
+			hasMissing := false
+
+			for _, language := range request.Languages {
+
+				str := allTranslations[language][term]
+				if len(str) > 0 {
+					termTrans[language] = str
+				} else {
+					hasMissing = true
+				}
+			}
+
+			if hasMissing && request.MissingOnly || !request.MissingOnly {
+				filteredTerms = append(filteredTerms, term)
+				for language, str := range termTrans {
+					if translations[language] == nil {
+						translations[language] = make(map[string]string)
+					}
+					translations[language][term] = str
+				}
+			}
+
+		}
+
+	}
+
+	total := len(filteredTerms)
+
+	from := request.Page * request.PageSize
+	termSize := len(filteredTerms)
+	expectedStop := request.PageSize
+
+	to := from + int(math.Min(float64(termSize), float64(expectedStop)))
+	filteredTerms = filteredTerms[from:to]
+	var paginatedTerms []string
+	for _, t := range filteredTerms {
+		if len(t) > 0 {
+			paginatedTerms = append(paginatedTerms, t)
 		}
 	}
 
-	ToJson(&fileContent, w)
+	filteredTerms = paginatedTerms
+	response := StringResponse{
+		Terms:        filteredTerms,
+		Translations: translations,
+		Progress:     progress,
+		Page:         request.Page,
+		PageSize:     request.PageSize,
+		Total:        total,
+	}
+
+	ToJson(&response, w)
 
 }
 
@@ -175,28 +263,14 @@ func GetProjectStatusHandler(user dao.UserFull, w http.ResponseWriter, r *http.R
 }
 
 func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, true, w, r)
-	if e != nil {
-		WebError(w, e, 500, "Something went wrong when getting project")
-		return
-	}
-
-	var file string
-	files, err := git.GetRepoFiles(fmt.Sprint(project.ID))
+	project, err := GetProjectForUser(user, true, w, r)
 	if err != nil {
-		WebError(w, err, 500, "Couldn't get project files")
-		log.Print(err)
+		WebError(w, err, 500, "Something went wrong when getting project")
 		return
 	}
 
 	var updateString UpdateString
 	FromJson(r.Body, &updateString)
-
-	for _, f := range files {
-		if updateString.Language+"."+project.FileType == f {
-			file = git.CloneRoot + "/" + fmt.Sprint(project.ID) + "/" + f
-		}
-	}
 
 	handler := fileHandlers.GetHandler(project.FileType)
 
@@ -207,7 +281,7 @@ func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = handler.UpdateString(file, updateString.Term, updateString.Value)
+	err = handler.UpdateString(project, updateString.Language, updateString.Term, updateString.Value)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't update file")
 		return
@@ -238,7 +312,7 @@ func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) 
 	}
 
 	handler := fileHandlers.GetHandler(project.FileType)
-	terms, e := handler.GetTerms(git.GetRepoRoot(project) + "/" + project.MainLanguage + "." + project.FileType)
+	terms, e := handler.GetTerms(project)
 	if e != nil {
 		WebError(w, e, 500, "Couldn't get terms")
 		return
@@ -295,10 +369,9 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	root := git.GetRepoRoot(project)
 	handler := fileHandlers.GetHandler(project.FileType)
 
-	newFileName, e := handler.CreateNewLanguage(root, languageCode)
+	newFileName, e := handler.CreateNewLanguage(project, languageCode)
 	if e != nil {
 		WebError(w, e, 500, "Error when creating new file")
 		log.Print(e)
@@ -343,35 +416,20 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//getting main language file
-	var file string
-	files, err := git.GetRepoFiles(fmt.Sprint(project.ID))
-	if err != nil {
-		WebError(w, err, 500, "Couldn't get project files")
-		log.Print(err)
-		return
-	}
-
 	var updateString UpdateString
 	FromJson(r.Body, &updateString)
-
-	for _, f := range files {
-		if project.MainLanguage+"."+project.FileType == f {
-			file = git.CloneRoot + "/" + fmt.Sprint(project.ID) + "/" + f
-		}
-	}
 
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	// checking if term already exists
-	_, err = handler.GetString(file, term)
+	_, err = handler.GetString(project, project.MainLanguage, term)
 	if err == nil {
 		error := errors.New("Term already exists")
 		WebError(w, error, 500, "")
 		return
 	}
 
-	handler.UpdateString(file, term, "")
+	handler.UpdateString(project, project.MainLanguage, term, "")
 
 	commitChanges, err := git.CommitChanges(project, "["+user.Email+"] update "+project.MainLanguage+": new term "+term)
 	if err != nil {

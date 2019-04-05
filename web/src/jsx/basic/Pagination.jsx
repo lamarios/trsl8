@@ -29,6 +29,11 @@ export default class Pagination extends React.Component {
 
     render() {
         let totalPages = parseInt(this.props.itemCount / this.props.pageSize);
+
+        if (this.props.itemCount % this.props.pageSize === 0) {
+            totalPages--;
+        }
+
         let pages = [];
 
 
@@ -42,7 +47,7 @@ export default class Pagination extends React.Component {
 
         for (let i = startFrom; i < stopAt; i++) {
             if (this.props.page === i) {
-                pages.push(<CurrentPage key={i} onClick={() => this.props.onPageChange(i)}>{i + 1}</CurrentPage>)
+                pages.push(<CurrentPage key={i}>{i + 1}</CurrentPage>)
             } else {
                 pages.push(<Page key={i} onClick={() => this.props.onPageChange(i)}>{i + 1}</Page>)
             }
@@ -58,14 +63,14 @@ export default class Pagination extends React.Component {
 
             {totalPages > 0 && <Container>
                 {this.props.page === 0 ?
-                    <CurrentPage onClick={() => this.props.onPageChange(0)}>{1}</CurrentPage>
+                    <CurrentPage>{1}</CurrentPage>
                     :
                     <Page onClick={() => this.props.onPageChange(0)}>{1}</Page>
                 }
 
                 {pages}
                 {this.props.page === totalPages ?
-                    <CurrentPage onClick={() => this.props.onPageChange(totalPages)}>{totalPages + 1}</CurrentPage>
+                    <CurrentPage>{totalPages + 1}</CurrentPage>
                     :
                     <Page onClick={() => this.props.onPageChange(totalPages)}>{totalPages + 1}</Page>
                 }

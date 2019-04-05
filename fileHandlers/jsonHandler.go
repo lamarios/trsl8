@@ -72,8 +72,8 @@ func (j JsonHandler) GetString(project dao.Project, language string, term string
 
 }
 
-func (j JsonHandler) GetTerms(project dao.Project, language string) ([]string, error) {
-	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
+func (j JsonHandler) GetTerms(project dao.Project) ([]string, error) {
+	content, e := GetFileContent(git.GetRepoRoot(project) + project.MainLanguage + ext)
 	if e != nil {
 		return nil, e
 	}
@@ -99,7 +99,8 @@ func (j JsonHandler) GetTerms(project dao.Project, language string) ([]string, e
 
 func (j JsonHandler) UpdateString(project dao.Project, language string, term string, value string) error {
 
-	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
+	file := git.GetRepoRoot(project) + language + ext
+	content, e := GetFileContent(file)
 	if e != nil {
 		return e
 	}
@@ -112,7 +113,7 @@ func (j JsonHandler) UpdateString(project dao.Project, language string, term str
 
 	jsonParsed.Set(value, term)
 
-	err := ioutil.WriteFile(language+ext, []byte(jsonParsed.StringIndent("", "  ")), 0644)
+	err := ioutil.WriteFile(file, []byte(jsonParsed.StringIndent("", "  ")), 0644)
 
 	return err
 }

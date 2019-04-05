@@ -10,17 +10,28 @@ justify-content: left;
 `;
 
 
-
 export default class ProjectFilter extends React.Component {
+
+    constructor(props) {
+        super(props);
+
+        this.triggerFilter = this.triggerFilter.bind(this);
+    }
+
+    triggerFilter(filter, onlyMissing) {
+        this.props.onChanged({filter, onlyMissing});
+    }
+
 
     render() {
         return (<Filters>
             Filter by:
-            <TextInput id={"filter"} value={this.props.filter}
-                       onChange={(e) => this.props.onFilterChanged(e.target.value)} placeholder="Terms"/>
-            <Checkbox value={this.props.onlyMissing}
+            <TextInput id={"filter"} value={this.props.filter.filter}
+                       onChange={(e) => this.triggerFilter(e.target.value, this.props.filter.onlyMissing)}
+                       placeholder="Terms"/>
+            <Checkbox value={this.props.filter.onlyMissing}
                       label="Show only Missing"
-                      onChange={(e) => this.props.onlyMissingChanged(e.target.checked)}/>
+                      onChange={(e) => this.triggerFilter(this.props.filter.filter, e.target.checked)}/>
         </Filters>);
     }
 }

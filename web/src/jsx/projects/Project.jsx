@@ -77,30 +77,30 @@ export default class Project extends React.Component {
             project: undefined,
             terms: [],
             translations: {},
-            renderedTerms: [],
-            renderedTranslations: {},
+            progress: {},
+            total: 0,
             page: 0,
             pageSize: 20,
-            filter: "",
-            onlyMissing: false,
-            totalFilteredTerms: 0,
-            filteredLanguages: [],
+            filter: {
+                filter: "",
+                onlyMissing: false,
+            },
             languages: [],
-            languageLoadings: {},
+            filteredLanguages: [],
             showNewLanguageDialog: false,
+            loadingStrings: true,
+            filterTimeout: undefined,
         };
         this.service = new Service();
         this.getProject = this.getProject.bind(this);
-        this.getFiles = this.getFiles.bind(this);
+        this.getStrings = this.getStrings.bind(this);
         this.stringUpdated = this.stringUpdated.bind(this);
-        this.renderPage = this.renderPage.bind(this);
         this.changePage = this.changePage.bind(this);
         this.changeFilteredLanguages = this.changeFilteredLanguages.bind(this);
-        this.onNewTerm = this.onNewTerm.bind(this);
         this.addLanguage = this.addLanguage.bind(this);
         this.removeLanguage = this.removeLanguage.bind(this);
         this.addLanguageColumn = this.addLanguageColumn.bind(this);
-        this.filterTerms = this.filterTerms.bind(this);
+        this.filterChanged = this.filterChanged.bind(this);
     }
 
     componentDidMount() {
@@ -111,6 +111,17 @@ export default class Project extends React.Component {
         if (this.props.match.params.id !== prevProps.match.params.id) {
             this.getProject();
         }
+    }
+
+    filterChanged(filter) {
+        if (this.state.filterTimeout !== undefined) {
+            clearTimeout(this.state.filterTimeout);
+        }
+
+        this.setState({filter, page:0}, () => {
+            this.setState({filterTimeout: setTimeout(() => this.getStrings(), 500)});
+        });
+
     }
 
     addLanguage(language) {
@@ -125,7 +136,7 @@ export default class Project extends React.Component {
                     languages: languages,
                     filteredLanguages: filteredLanguages
                 }, () => {
-                    this.renderPage();
+                    this.getStrings();
                 });
             }).catch(res => {
             res.then(err => err.then(json => this.setState({showError: true, errorMessage: json})));
@@ -141,7 +152,7 @@ export default class Project extends React.Component {
             const filteredLanguages = this.state.filteredLanguages;
             filteredLanguages.push(usableLanguages[0]);
             this.setState({filteredLanguages: filteredLanguages}, () => {
-                this.getFiles(usableLanguages[0]);
+                this.getStrings(usableLanguages[0]);
             });
         }
 
@@ -160,44 +171,39 @@ export default class Project extends React.Component {
 
         translations[language] = {};
 
-        this.setState({filteredLanguages: filteredLanguages, translations: translations}, () => this.renderPage());
+        this.setState({filteredLanguages: filteredLanguages, translations: translations}, () => this.getStrings());
     }
 
-    onNewTerm(term) {
-        if (term.length > 0) {
-            let terms = this.state.terms;
-            terms.push(term);
 
-            this.setState({terms: terms, newTerm: ""}, () => this.renderPage());
-        }
-    }
+    getStrings() {
 
-    getFiles(language) {
-        const loadings = this.state.languageLoadings;
-        loadings[language] = true;
+        const request = {
+            Languages: this.state.filteredLanguages,
+            Page: this.state.page,
+            PageSize: this.state.pageSize,
+            MissingOnly: this.state.filter.onlyMissing,
+            Filter: this.state.filter.filter,
+        };
 
-        this.setState({languageLoadings: loadings}, () => {
+        this.setState({loadingStrings: true}, () => {
 
-            this.service.getProjectStrings(this.props.match.params.id, language)
+            this.service.getProjectStrings(this.props.match.params.id, request)
                 .then(res => {
                     // let keys = Object.keys(res[this.state.project.MainLanguage]);
-                    let translations = this.state.translations;
-                    translations[language] = res;
-
-                    const loadings = this.state.languageLoadings;
-                    loadings[language] = false;
 
                     this.setState({
-                        translations: translations,
-                        languageLoadings: loadings
-                    }, this.renderPage);
+                        translations: res.Translations,
+                        terms: res.Terms,
+                        progress: res.Progress,
+                        total: res.Total
+                    });
                 });
         });
     }
 
 
     changePage(page) {
-        this.setState({page: page}, () => this.renderPage());
+        this.setState({page: page}, () => this.getStrings());
     }
 
     changeFilteredLanguages(language, index) {
@@ -206,81 +212,22 @@ export default class Project extends React.Component {
         languages[index] = language;
         console.log(this.state.filteredLanguages);
         this.setState({filteredLanguages: languages}, () => {
-            console.log(this.state.filteredLanguages);
-            this.getFiles(language);
+            this.getStrings();
         });
     }
 
-    filterTerms(terms) {
-        let start = this.state.page * this.state.pageSize;
-        let end = start + this.state.pageSize;
-
-        let slicedTerms = terms
-            .filter(s => this.state.filter.length === 0 || s.toUpperCase().replace("_", " ").includes(this.state.filter.toUpperCase()))
-            .filter(s => {
-                if (this.state.onlyMissing) {
-                    var missing = false;
-                    this.state.filteredLanguages
-                        .forEach(language => {
-                            let value = this.state.translations[language][s];
-                            if (value === undefined || value.length === 0) {
-                                missing = true;
-                            }
-
-                        });
-
-                    return missing;
-                } else {
-                    return true;
-                }
-            });
-
-        this.setState({totalFilteredTerms: slicedTerms.length});
-        return slicedTerms.slice(start, end);
-    }
-
-    renderPage() {
-
-        //reducing the items displayed
-        let slicedTerms = this.filterTerms(this.state.terms);
-
-
-        let renderedTranslations = {};
-
-        Object.keys(this.state.translations).forEach(key => {
-            renderedTranslations[key] = {};
-            slicedTerms.forEach(t => {
-                renderedTranslations[key][t] = this.state.translations[key][t];
-            });
-        });
-
-
-        this.setState({
-            renderedTranslations: renderedTranslations,
-            renderedTerms: slicedTerms,
-        });
-
-    }
 
     stringUpdated(term, language, value) {
         console.log(term, language, value);
-        const renderedTranslations = this.state.renderedTranslations;
         const translations = this.state.translations;
-
-        if (renderedTranslations[language] === undefined) {
-            renderedTranslations[language] = {};
-        }
 
         if (translations[language] === undefined) {
             translations[language] = {};
         }
 
-        renderedTranslations[language][term] = value;
         translations[language][term] = value;
 
-
         this.setState({
-            renderedTranslations,
             translations
         },);
     }
@@ -292,34 +239,29 @@ export default class Project extends React.Component {
 
         this.service.getProject(this.props.match.params.id)
             .then(project => {
+                project.isOwner = this.service.getUserData().ID === project.OwnerID;
                 this.setState({project: project}, () => {
                     //adding flag to make life easier
-                    project.isOwner = this.service.getUserData().ID === project.OwnerID;
 
-                    this.service.getProjectTerms(project.ID)
-                        .then(terms => {
-                            this.setState({terms: terms, renderedTerms: this.filterTerms(terms)}, () => {
-                                this.service.getLanguages(project.ID)
-                                    .then(res => {
+                    this.service.getLanguages(project.ID)
+                        .then(res => {
 
-                                        if (this.state.filteredLanguages.length == 0) {
-                                            let filteredLanguages = [];
-                                            if (res.length >= 1) {
-                                                filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
-                                            }
+                            if (this.state.filteredLanguages.length === 0) {
+                                let filteredLanguages = [];
+                                if (res.length >= 1) {
+                                    filteredLanguages[0] = res[res.indexOf(project.MainLanguage)];
+                                }
 
 
-                                            this.setState({
-                                                languages: res,
-                                                filteredLanguages: filteredLanguages
-                                            }, () => {
-                                                if (getFiles) {
-                                                    this.state.filteredLanguages.forEach(l => this.getFiles(l));
-                                                }
-                                            });
-                                        }
-                                    });
-                            });
+                                this.setState({
+                                    languages: res,
+                                    filteredLanguages: filteredLanguages
+                                }, () => {
+                                    if (getFiles) {
+                                        this.getStrings();
+                                    }
+                                });
+                            }
                         });
                 });
             });
@@ -328,6 +270,9 @@ export default class Project extends React.Component {
     render() {
 
         let languages = this.state.filteredLanguages;
+        const terms = this.state.terms;
+        const translations = this.state.translations;
+        const progress = this.state.progress;
 
         return (<div>
             {this.state.project !== undefined && <div>
@@ -343,15 +288,7 @@ export default class Project extends React.Component {
                 </TitleBar>
                 <ProjectFilter
                     filter={this.state.filter}
-                    onFilterChanged={(value => this.setState({
-                        filter: value,
-                        page: 0
-                    }, () => this.renderPage()))}
-                    onlyMissing={this.state.onlyMissing}
-                    onlyMissingChanged={value => this.setState({
-                        onlyMissing: value,
-                        page: 0
-                    }, () => this.renderPage())}
+                    onChanged={this.filterChanged}
                 />
 
                 <TableContainer>
@@ -373,48 +310,28 @@ export default class Project extends React.Component {
                         </thead>
                         <tbody>
                         <tr>
-                            <td></td>
+                            <td>Language Progress</td>
                             {languages.map((lang, index) => {
-                                let progress = 0;
-                                if (this.state.translations[lang] !== undefined) {
-                                    progress = Object.keys(this.state.translations[lang])
-                                        .filter(k => this.state.translations[lang][k].length > 0)
-                                        .length;
-
-                                    progress = Math.min(progress, this.state.terms.length);
-                                }
                                 return <td key={lang}>
-                                    <ProgressBar value={progress} max={this.state.terms.length}/>
+                                    <ProgressBar percent={progress[lang]}/>
                                 </td>;
                             })}
                         </tr>
-                        {this.state.renderedTerms.map((t, index) => <tr key={t}>
+                        {terms.map((t, index) => <tr key={t}>
                             <td>{t}</td>
                             {languages.map((l) => {
-                                    if (this.state.languageLoadings[l] !== undefined
-                                        && this.state.languageLoadings[l] === true
-                                    ) {
-                                        if (index === 0) {
-                                            return <TranslationLoading key={l} rowSpan={this.state.renderedTerms.length}>
-                                                <Loading/>
-                                            </TranslationLoading>;
-                                        } else {
-                                            return null;
-                                        }
-                                    } else {
-                                        return <StringCell key={l}
-                                                           value={this.state.renderedTranslations[l] !== undefined
-                                                               ? this.state.renderedTranslations[l][t] : ""}
-                                                           onChange={this.stringUpdated}
-                                                           language={l}
-                                                           term={t}
-                                                           project={this.state.project}
-                                        />;
-                                    }
+                                    return <StringCell key={l}
+                                                       value={translations[l] !== undefined
+                                                           ? translations[l][t] : ""}
+                                                       onChange={this.stringUpdated}
+                                                       language={l}
+                                                       term={t}
+                                                       project={this.state.project}
+                                    />;
                                 }
                             )}
                             {index === 0 && languages.length < this.state.languages.length &&
-                            <td rowSpan={this.state.renderedTerms.length}>
+                            <td rowSpan={terms.length}>
                                 <AddLanguageColumnButton onClick={this.addLanguageColumn}>
                                     <FontAwesomeIcon icon={faPlus}/>
                                 </AddLanguageColumnButton>
@@ -422,15 +339,15 @@ export default class Project extends React.Component {
                         </tr>)}
 
                         <tr>
-                            <td colSpan={this.state.filteredLanguages.length + 1}>
+                            <td colSpan={languages.length + 1}>
                             </td>
                         </tr>
 
                         </tbody>
                     </TranslationContainer>
                     <Pagination page={this.state.page} onPageChange={this.changePage}
-                                itemCount={this.state.totalFilteredTerms} pageSize={this.state.pageSize}/>
-                    <CreateNewTerm onNewTerm={this.onNewTerm} project={this.state.project}/>
+                                itemCount={this.state.total} pageSize={this.state.pageSize}/>
+                    <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
                 </TableContainer>
             </div>}
 
@@ -440,7 +357,7 @@ export default class Project extends React.Component {
             {this.state.showNewLanguageDialog &&
             <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
                                addLanguage={this.addLanguage}
-                               existingLanguages={Object.keys(this.state.translations)}/>}
+                               existingLanguages={this.state.languages}/>}
         </div>);
     }
 

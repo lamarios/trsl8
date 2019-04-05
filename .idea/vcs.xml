@@ -15,6 +15,7 @@
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test312545420" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test334862943" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test368645096" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test372753117" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test436270289" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test450961041" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test459531861" vcs="Git" />
@@ -27,5 +28,6 @@
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test795904187" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test840312147" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test842869238" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test967761971" vcs="Git" />
   </component>
 </project>
