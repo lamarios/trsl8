@@ -1,7 +1,7 @@
 import React from 'react';
 import Overlay from "./Overlay.jsx";
 import styled, {keyframes} from 'styled-components';
-import {fadeIn} from "../animations";
+import {fadeInLeft} from "../animations";
 
 
 const DialogContent = styled.div`
@@ -13,7 +13,7 @@ const DialogContent = styled.div`
  border-radius: 5px;
  box-shadow: 0 0 200px #000;
 
-  animation: ${fadeIn} 0.25s
+  animation: ${fadeInLeft} 0.25s ease-in;
 `;
 
 const Button = styled.button`

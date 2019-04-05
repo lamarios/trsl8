@@ -4,10 +4,11 @@ import Title from "./basic/Title";
 import PrimaryButton from "./basic/PrimaryButton";
 import Service from './Service';
 import TextInput from "./basic/TextInput";
+import {fadeInLeft} from "./animations";
 
 const SetUp = styled.div`
      color: ${props => props.theme.colors.text.primary};    
-
+    animation: ${fadeInLeft} 0.25s ease-out;
     `;
 
 export default class SignUp extends React.Component {

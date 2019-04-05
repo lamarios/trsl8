@@ -3,11 +3,12 @@ import styled from "styled-components";
 import Me from "./Me";
 import SignUpSignIgn from "./SignUpSignIgn";
 import {NavLink} from "react-router-dom";
+import {fadeInTop} from "../animations";
 
 const Container = styled.div`
 display: flex;
 align-items: center;
-
+animation: ${fadeInTop} 0.25s ease-in;
 `;
 
 const Left = styled.div`

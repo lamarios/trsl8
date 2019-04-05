@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import TextArea from "../basic/TextArea";
 import Loading from "../basic/Loading";
 import Service from "../Service";
-import TextInput from "../basic/TextInput";
+import {fadeInLeft} from "../animations";
 
 const StringInput = styled(TextArea)`
 min-width: 150px;
@@ -18,6 +18,8 @@ const StringInputLoading = styled.div`
 position: absolute;
 top:0;
 right:0;
+
+animation: ${fadeInLeft} 0.25s ease-out;
 `;
 
 export default class StringCell extends React.Component {
@@ -31,7 +33,6 @@ export default class StringCell extends React.Component {
     }
 
     onValueChanged(e) {
-console.log('props', this.props, 'value', e.target.value);
         this.props.onChange(this.props.term, this.props.language, e.target.value);
 
 

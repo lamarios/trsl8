@@ -2,10 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import Service from "../Service";
 import Title from "../basic/Title";
-import TextInput from "../basic/TextInput";
-import update from "immutability-helper";
 import Pagination from "../basic/Pagination";
-import Loading from "../basic/Loading";
 import PrimaryButton from "../basic/PrimaryButton";
 import OkDialog from "../basic/OkDialog";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
@@ -17,6 +14,7 @@ import LanguageSelector from "./LanguageSelector";
 import ProjectFilter from "./ProjectFilter";
 import CreateNewTerm from "./CreateNewTerm";
 import ProgressBar from "../basic/ProgressBar";
+import {fadeInLeft} from "../animations";
 
 
 const TitleBar = styled.div`
@@ -55,12 +53,9 @@ cursor: pointer;
 
 const TableContainer = styled.div`
 position: relative;
+animation: ${fadeInLeft} 0.25s ease-out;
 `;
 
-const TranslationLoading = styled.td`
-font-size: 40px;
-text-align: center;
-`;
 
 const AddLanguageColumnButton = styled.div`
   color: ${props => props.theme.colors.primary.main};
@@ -68,6 +63,17 @@ const AddLanguageColumnButton = styled.div`
   cursor: pointer;
 `;
 
+const LanguageProgressRow = styled.tr`
+    background-color: #fbfbfb;
+    td{
+        border-bottom: 1px solid ${props => props.theme.colors.text.light};
+        padding: 0px 10px;
+    }
+`;
+
+const ProjectInfoContainer = styled.div`
+animation: ${fadeInLeft} 0.25s ease-out;
+`;
 
 export default class Project extends React.Component {
     constructor(props) {
@@ -118,7 +124,7 @@ export default class Project extends React.Component {
             clearTimeout(this.state.filterTimeout);
         }
 
-        this.setState({filter, page:0}, () => {
+        this.setState({filter, page: 0}, () => {
             this.setState({filterTimeout: setTimeout(() => this.getStrings(), 500)});
         });
 
@@ -176,7 +182,6 @@ export default class Project extends React.Component {
 
 
     getStrings() {
-
         const request = {
             Languages: this.state.filteredLanguages,
             Page: this.state.page,
@@ -218,7 +223,6 @@ export default class Project extends React.Component {
 
 
     stringUpdated(term, language, value) {
-        console.log(term, language, value);
         const translations = this.state.translations;
 
         if (translations[language] === undefined) {
@@ -276,21 +280,24 @@ export default class Project extends React.Component {
 
         return (<div>
             {this.state.project !== undefined && <div>
-                <TitleBar>
-                    <ProjectTitle>
-                        {this.state.project.Name}
-                    </ProjectTitle>
-                    <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
-                        <FontAwesomeIcon icon={faPlus}/>
-                        &nbsp;New language
-                    </NewLanguageButton>
-                    <ProjectUsers project={this.state.project} onUsersChanged={() => this.getProject(false)}/>
-                </TitleBar>
-                <ProjectFilter
-                    filter={this.state.filter}
-                    onChanged={this.filterChanged}
-                />
+                <ProjectInfoContainer>
+                    <TitleBar>
+                        <ProjectTitle>
+                            {this.state.project.Name}
+                        </ProjectTitle>
+                        <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
+                            <FontAwesomeIcon icon={faPlus}/>
+                            &nbsp;New language
+                        </NewLanguageButton>
+                        <ProjectUsers project={this.state.project} onUsersChanged={() => this.getProject(false)}/>
+                    </TitleBar>
+                    <ProjectFilter
+                        filter={this.state.filter}
+                        onChanged={this.filterChanged}
+                    />
+                </ProjectInfoContainer>
 
+                {terms.length > 0 &&
                 <TableContainer>
                     <TranslationContainer>
                         <thead>
@@ -309,14 +316,14 @@ export default class Project extends React.Component {
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                        {Object.keys(progress).length > 0 && <LanguageProgressRow>
                             <td>Language Progress</td>
                             {languages.map((lang, index) => {
                                 return <td key={lang}>
                                     <ProgressBar percent={progress[lang]}/>
                                 </td>;
                             })}
-                        </tr>
+                        </LanguageProgressRow>}
                         {terms.map((t, index) => <tr key={t}>
                             <td>{t}</td>
                             {languages.map((l) => {
@@ -349,6 +356,7 @@ export default class Project extends React.Component {
                                 itemCount={this.state.total} pageSize={this.state.pageSize}/>
                     <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
                 </TableContainer>
+                }
             </div>}
 
             {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>

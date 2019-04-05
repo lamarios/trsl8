@@ -5,8 +5,11 @@ import Service from "./Service";
 import TextInput from "./basic/TextInput";
 import PrimaryButton from "./basic/PrimaryButton";
 import {NavLink} from 'react-router-dom'
+import {fadeInLeft} from "./animations";
 
-const LoginForm = styled.div``;
+const LoginForm = styled.div`
+animation: ${fadeInLeft} 0.25s ease-out;
+`;
 const SignUpLink = styled(NavLink)``;
 export default class Login extends React.Component {
     constructor(props) {

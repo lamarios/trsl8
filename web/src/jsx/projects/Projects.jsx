@@ -8,6 +8,7 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import ProjectList from "./ProjectList";
 import SecondaryTitle from "../basic/SecondaryTitle";
+import {fadeInLeft} from "../animations";
 
 
 const AddProjectButton = styled(PrimaryButton)`
@@ -19,8 +20,13 @@ padding: 5px 7px;
 
 const ProjectContainer = styled.div`
   margin:20px 0px;
+animation: ${fadeInLeft} 0.25s ease-out;
 `;
 
+
+const PageHeader = styled.div`
+    animation: ${fadeInLeft} 0.25s ease-out;
+`;
 
 export default class Projects extends React.Component {
 
@@ -55,14 +61,16 @@ export default class Projects extends React.Component {
         const asContributor = this.state.projects.filter(p => p.Owner.ID !== this.state.user.ID);
 
         return (<div>
-            <Title>Projects</Title>
+            <PageHeader>
+                <Title>Projects</Title>
 
 
-            <AddProjectButton onClick={() => this.setState({showNewProjectDialog: true})}>
-                <FontAwesomeIcon icon={faPlus}/>
-                &nbsp;
-                Create project
-            </AddProjectButton>
+                <AddProjectButton onClick={() => this.setState({showNewProjectDialog: true})}>
+                    <FontAwesomeIcon icon={faPlus}/>
+                    &nbsp;
+                    Create project
+                </AddProjectButton>
+            </PageHeader>
 
             {asOwner.length > 0 && <ProjectContainer>
                 <SecondaryTitle>Your Projects</SecondaryTitle>

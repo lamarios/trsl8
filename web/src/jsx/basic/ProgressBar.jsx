@@ -6,6 +6,7 @@ const Container = styled.div`
 height: 10px;
 background-color: #ddd;
 border-radius: 5px;
+width:100%;
 `;
 const Progress = styled.div`
   width: ${props => props.percentage}%;
@@ -27,7 +28,7 @@ export default class ProgressBar extends React.Component {
         const percentage = this.props.percent ? this.props.percent :  (this.props.value * 100 / this.props.max);
 
         return (<Container>
-            <Progress percentage={percentage}/>
+            {percentage > 0 && <Progress percentage={percentage}/>}
         </Container>);
     }
 

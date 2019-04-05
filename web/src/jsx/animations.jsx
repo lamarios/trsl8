@@ -29,6 +29,18 @@ transform: scale(0.7);
 opacity: 1;
 transform: scale(1);
 }
+`;
+
+export const fadeInLeft = keyframes`
+0%{
+opacity: 0;
+transform: translateX(-20px);
+}
+
+100%{
+opacity: 1;
+transform: translateX(0px);
+}
 
 `;
 

@@ -6,6 +6,9 @@ const ProjectsContainer = styled.table`
 border-spacing: 0 0;
 unset:all;
 width:100%;
+  tbody > tr:nth-of-type(2n){
+    background-color: #fafafa;
+  }
 `;
 
 const ProjectTableHead = styled.thead`
@@ -29,6 +32,7 @@ export default class ProjectList extends React.Component {
             <ProjectTableHead>
                 <tr>
                     <th>Name</th>
+                    <th>Progress (top 3)</th>
                 </tr>
             </ProjectTableHead>
             <tbody>

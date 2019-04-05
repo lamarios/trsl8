@@ -30,6 +30,7 @@ func DefineEndPoints(r *mux.Router) {
 	r.HandleFunc("/api/projects", CheckAuth(CreateProject)).Methods("POST")
 	r.HandleFunc("/api/projects/test", CheckAuth(TestProjectHandler)).Methods("POST")
 	r.HandleFunc("/api/projects/{project}", CheckAuth(GetProjectHandler)).Methods("GET")
+	r.HandleFunc("/api/projects/{project}/progress", CheckAuth(GetProjectProgressHandler)).Methods("GET")
 	r.HandleFunc("/api/projects/{project}/terms", CheckAuth(GetTermsHandler)).Methods("GET")
 	r.HandleFunc("/api/projects/{project}/terms", CheckAuth(NewTermHandler)).Methods("POST")
 	r.HandleFunc("/api/projects/{project}/languages", CheckAuth(GetProjectLanguagesHandler)).Methods("GET")

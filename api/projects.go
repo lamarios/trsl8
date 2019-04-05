@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -51,6 +52,55 @@ var (
 	projectPushMap = make(map[uint]xid.ID)
 )
 
+func GetProjectProgressHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
+	project, err := GetProjectForUser(user, true, w, r)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't get project")
+		return
+	}
+
+	err = git.Pull(project)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't pull lastest changes")
+		return
+	}
+
+	handler := fileHandlers.GetHandler(project.FileType)
+
+	terms, err := handler.GetTerms(project)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't get the terms")
+		return
+	}
+
+	languages, err := handler.GetLanguages(project)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't get the languages")
+		return
+	}
+
+	progress := make(map[string]int)
+	for _, language := range languages {
+
+		langStrings, err := handler.GetStrings(project, language)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't get the translations")
+			return
+		}
+
+		//counting total
+		count := 0
+		for _, s := range langStrings {
+			if len(s) > 0 {
+				count++
+			}
+		}
+		progress[language] = count * 100 / len(terms)
+	}
+
+	ToJson(progress, w)
+
+}
 func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	project, err := GetProjectForUser(user, true, w, r)
 	if err != nil {
@@ -104,9 +154,16 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 	}
 
 	// now getting based on each term
+	request.Filter = strings.ToUpper(request.Filter)
 	for _, term := range terms {
+		reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-		if strings.Contains(term, request.Filter) {
+		tempTerm := reg.ReplaceAllString(term, " ")
+		tempTerm = strings.ToUpper(tempTerm)
+		if strings.Contains(tempTerm, request.Filter) {
 
 			termTrans := make(map[string]string)
 			hasMissing := false
@@ -143,7 +200,7 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 
 	to := from + int(math.Min(float64(termSize), float64(expectedStop)))
 	filteredTerms = filteredTerms[from:to]
-	var paginatedTerms []string
+	paginatedTerms := make([]string, 0)
 	for _, t := range filteredTerms {
 		if len(t) > 0 {
 			paginatedTerms = append(paginatedTerms, t)

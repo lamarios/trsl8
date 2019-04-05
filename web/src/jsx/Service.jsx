@@ -12,6 +12,7 @@ const ENDPOINTS = {
         },
         PROJECTS: {
             GET_ALL: "/api/projects",
+            GET_PROGRESS: "/api/projects/%s/progress",
             TEST: "/api/projects/test",
             GET: "/api/projects/{id}",
             GET_STRINGS: "/api/projects/%s/strings/all",
@@ -93,6 +94,17 @@ export default class Service {
         }).then(this.getJson.bind(this))
     }
 
+    /**
+     * Get progress of languages for a project
+     * @return {Promise<Response | never>}
+     */
+    getProjectProgress(id) {
+        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_PROGRESS, id), {
+            headers: {
+                "Authorization": this.checkLocalStorage()
+            }
+        }).then(this.getJson.bind(this))
+    }
 
     /**
      * Gets a single project

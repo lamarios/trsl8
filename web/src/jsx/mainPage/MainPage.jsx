@@ -1,12 +1,18 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
+import {fadeInLeft} from "../animations";
 
 
-export default class MainPage extends React.Component{
+const Container = styled.div`
+    animation: ${fadeInLeft} 0.25s ease-in;
+`;
 
+export default class MainPage extends React.Component {
 
 
     render() {
-        return <h1>Yo</h1>
+        return <Container>
+            <h1>Yo</h1>
+        </Container>;
     }
 }
