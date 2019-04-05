@@ -59,7 +59,7 @@ func GetRepoFiles(dir string) ([]string, error) {
 }
 
 func GetRepoRoot(project dao.Project) string {
-	return CloneRoot + "/" + fmt.Sprint(project.ID)
+	return CloneRoot + "/" + fmt.Sprint(project.ID) + "/"
 }
 
 func Pull(project dao.Project) error {
@@ -90,7 +90,7 @@ func Pull(project dao.Project) error {
 
 	err = w.Pull(&options)
 	// up to date is not an error for us
-	if err != nil && err.Error() == "already up-to-date" || err.Error() == "non-fast-forward update" {
+	if err != nil && (err.Error() == "already up-to-date" || err.Error() == "non-fast-forward update") {
 		return nil
 	}
 	return err

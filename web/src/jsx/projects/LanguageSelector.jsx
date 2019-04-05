@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import Select from "../basic/Select";
 import {faTimes} from "@fortawesome/free-solid-svg-icons";
+import ProgressBar from "../basic/ProgressBar";
 
 const TableHead = styled.div`
   display: flex;

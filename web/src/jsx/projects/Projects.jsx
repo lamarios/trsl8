@@ -1,11 +1,11 @@
-import React from 'react';
-import styled from 'styled-components'
+import React from "react";
+import styled from "styled-components";
 import Service from "../Service";
 import Title from "../basic/Title";
 import PrimaryButton from "../basic/PrimaryButton";
 import NewProjectDialog from "./NewProjectDialog";
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
-import {faPlus} from '@fortawesome/free-solid-svg-icons'
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import ProjectList from "./ProjectList";
 import SecondaryTitle from "../basic/SecondaryTitle";
 
@@ -14,6 +14,11 @@ const AddProjectButton = styled(PrimaryButton)`
 margin: 10px 0;
 font-size: 15px;
 padding: 5px 7px;
+`;
+
+
+const ProjectContainer = styled.div`
+  margin:20px 0px;
 `;
 
 
@@ -59,14 +64,17 @@ export default class Projects extends React.Component {
                 Create project
             </AddProjectButton>
 
-            <SecondaryTitle>Your Projects</SecondaryTitle>
-            <ProjectList projects={asOwner}/>
+            {asOwner.length > 0 && <ProjectContainer>
+                <SecondaryTitle>Your Projects</SecondaryTitle>
+                <ProjectList projects={asOwner}/>
+            </ProjectContainer>}
 
-            <SecondaryTitle>As Contributor</SecondaryTitle>
-            <ProjectList projects={asContributor}/>
-
+            {asContributor.length > 0 && <ProjectContainer>
+                <SecondaryTitle>As Contributor</SecondaryTitle>
+                <ProjectList projects={asContributor}/>
+            </ProjectContainer>}
 
             {this.state.showNewProjectDialog && <NewProjectDialog dismiss={this.dismissDialog}/>}
-        </div>)
+        </div>);
     }
 }

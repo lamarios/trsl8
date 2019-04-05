@@ -57,3 +57,15 @@ transform: translateX(0);
 }
 
 `;
+
+export const widthGrow = props => keyframes`
+0%{
+opacity: 0;
+width: 0;
+}
+
+100%{
+opacity: 1;
+width:${props => props.percentage};
+}
+`;

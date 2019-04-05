@@ -1,8 +1,8 @@
-import {sprintf} from 'sprintf-js'
+import {sprintf} from "sprintf-js"
 
 const ENDPOINTS = {
     USERS: {
-        LOGIN: '/login-submit'
+        LOGIN: "/login-submit"
     },
     API: {
         USERS: {
@@ -11,25 +11,26 @@ const ENDPOINTS = {
             SELF: "/api/users/self",
         },
         PROJECTS: {
-            GET_ALL: '/api/projects',
-            TEST: '/api/projects/test',
-            GET: '/api/projects/{id}',
-            GET_STRINGS: '/api/projects/%s/strings/%s',
-            UPDATE_STRINGS: '/api/projects/%s/strings',
-            CREATE_TERM: '/api/projects/{id}/terms',
-            GET_TERM: '/api/projects/%s/terms',
-            CREATE_LANGUAGE: '/api/projects/{id}/languages',
-            GET_LANGUAGES: '/api/projects/%s/languages',
+            GET_ALL: "/api/projects",
+            TEST: "/api/projects/test",
+            GET: "/api/projects/{id}",
+            GET_STRINGS: "/api/projects/%s/strings/%s",
+            UPDATE_STRINGS: "/api/projects/%s/strings",
+            CREATE_TERM: "/api/projects/{id}/terms",
+            GET_TERM: "/api/projects/%s/terms",
+            CREATE_LANGUAGE: "/api/projects/{id}/languages",
+            GET_LANGUAGES: "/api/projects/%s/languages",
             USERS: {
                 ADD: "/api/projects/{id}/users/{userId}",
             }
         },
         SSH: {
-            GENERATE_KEYS: '/api/ssh-keys'
+            GENERATE_KEYS: "/api/ssh-keys"
         }
     }
 
-}
+};
+
 
 export default class Service {
 
@@ -40,10 +41,10 @@ export default class Service {
      */
     signUp(user) {
         return fetch(ENDPOINTS.API.USERS.SIGN_UP, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(user), // data can be `string` or {object}!
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             }
         }).then(this.getJsonNoLoginRedirect);
     }
@@ -55,10 +56,10 @@ export default class Service {
      */
     login(user) {
         return fetch(ENDPOINTS.USERS.LOGIN, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(user), // data can be `string` or {object}!
             headers: {
-                'Content-Type': 'application/json'
+                "Content-Type": "application/json"
             }
         }).then(this.getJsonNoLoginRedirect);
     }
@@ -66,15 +67,15 @@ export default class Service {
     getSelf() {
         return fetch(ENDPOINTS.API.USERS.SELF, {
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': this.checkLocalStorage()
+                "Content-Type": "application/json",
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJsonNoLoginRedirect);
     }
 
     checkLocalStorage() {
         if (window.localStorage.getItem("token") === null) {
-            window.location.href = '/login';
+            window.location.href = "/login";
         }
 
         return window.localStorage.getItem("token");
@@ -87,7 +88,7 @@ export default class Service {
     getProjects() {
         return fetch(ENDPOINTS.API.PROJECTS.GET_ALL, {
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -101,7 +102,7 @@ export default class Service {
     getProject(id) {
         return fetch(ENDPOINTS.API.PROJECTS.GET.replace("{id}", id), {
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -114,7 +115,7 @@ export default class Service {
     getProjectStrings(id, language1) {
         return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_STRINGS, id, language1), {
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -125,11 +126,11 @@ export default class Service {
      */
     createProject(project) {
         return fetch(ENDPOINTS.API.PROJECTS.GET_ALL, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(project), // data can be `string` or {object}!
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': this.checkLocalStorage()
+                "Content-Type": "application/json",
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -142,11 +143,11 @@ export default class Service {
     testProject(params) {
 
         return fetch(ENDPOINTS.API.PROJECTS.TEST, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(params), // data can be `string` or {object}!
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': this.checkLocalStorage()
+                "Content-Type": "application/json",
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -158,10 +159,10 @@ export default class Service {
      */
     updateString(id, string) {
         return fetch(sprintf(ENDPOINTS.API.PROJECTS.UPDATE_STRINGS, id), {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(string), // data can be `string` or {object}!
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -174,7 +175,7 @@ export default class Service {
     getProjectTerms(id) {
         return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_TERM, id), {
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -186,10 +187,10 @@ export default class Service {
      */
     createTerm(id, term) {
         return fetch(ENDPOINTS.API.PROJECTS.CREATE_TERM.replace("{id}", id), {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(term), // data can be `string` or {object}!
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -203,7 +204,7 @@ export default class Service {
     getLanguages(id) {
         return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_LANGUAGES, id), {
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -216,10 +217,10 @@ export default class Service {
      */
     createLanguage(id, languageCode) {
         return fetch(ENDPOINTS.API.PROJECTS.CREATE_LANGUAGE.replace("{id}", id), {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(languageCode), // data can be `string` or {object}!
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -230,9 +231,9 @@ export default class Service {
      */
     generateSshKeys() {
         return fetch(ENDPOINTS.API.SSH.GENERATE_KEYS, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -244,10 +245,10 @@ export default class Service {
      */
     searchUser(search) {
         return fetch(ENDPOINTS.API.USERS.SEARCH, {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             body: JSON.stringify(search),
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -261,18 +262,18 @@ export default class Service {
      */
     addUserToProject(projectId, userId) {
         return fetch(ENDPOINTS.API.PROJECTS.USERS.ADD.replace("{id}", projectId).replace("{userId}", userId), {
-            method: 'POST', // or 'PUT'
+            method: "POST", // or "PUT"
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
 
     removeUserFromProject(projectId, userId) {
         return fetch(ENDPOINTS.API.PROJECTS.USERS.ADD.replace("{id}", projectId).replace("{userId}", userId), {
-            method: 'DELETE', // or 'PUT'
+            method: "DELETE", // or "PUT"
             headers: {
-                'Authorization': this.checkLocalStorage()
+                "Authorization": this.checkLocalStorage()
             }
         }).then(this.getJson.bind(this))
     }
@@ -287,15 +288,17 @@ export default class Service {
 
     getJson(res) {
         if (res.status === 401) {
-            window.location.href = '/login';
+            window.location.href = "/login";
         }
         return this.getJsonNoLoginRedirect(res)
     }
 
     getUserData() {
         const token = window.localStorage.getItem("token");
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
         return JSON.parse(window.atob(base64)).Data.User;
     }
 }
+
+export const service = new Service();

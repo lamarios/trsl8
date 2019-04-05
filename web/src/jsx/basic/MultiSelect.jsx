@@ -53,7 +53,7 @@ export default class MultiSelect extends React.Component {
 
 
     toggleDropDown() {
-        this.setState({showDropDown: !this.state.showDropDown});
+        this.setState({showPanel: !this.state.showPanel});
     }
 
     toggleValue(value) {
@@ -78,7 +78,7 @@ export default class MultiSelect extends React.Component {
                 {this.props.options.length} selected
                 <Chevron icon={faChevronDown}/></Input>
 
-            {this.state.showDropDown &&
+            {this.state.showPanel &&
             <Dropdown dismiss={this.toggleDropDown}>
                 <Options>
                     {this.props.allowClearAll && <Option onClick={() => this.props.onChange([])}><Selected></Selected>Clear all</Option>}

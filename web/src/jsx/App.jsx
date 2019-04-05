@@ -22,7 +22,6 @@ const GlobalStyle = createGlobalStyle`
 `
 
 const AppContainer = styled.div`
-  width:900px;
   margin: 0 50px;
 `;
 

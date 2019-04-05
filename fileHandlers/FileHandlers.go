@@ -1,15 +1,18 @@
 package fileHandlers
 
 import (
+	"github.com/lamarios/translator/dao"
 	"io/ioutil"
 )
 
 type fileHandler interface {
-	GetStrings(fileLocaltion string) (map[string]string, error)
-	GetString(fileLocaltion string, term string) (string, error)
-	GetTerms(fileLocation string) ([]string, error)
-	UpdateString(fileLocation string, term string, value string) error
-	CreateNewLanguage(repoRoot string, languageCode string) (string, error)
+	GetStrings(project dao.Project, language string) (map[string]string, error)
+	GetString(project dao.Project, language string, term string) (string, error)
+	GetTerms(project dao.Project, language string) ([]string, error)
+	UpdateTerm(project dao.Project, language string, old string, new string) error
+	UpdateString(project dao.Project, language string, term string, value string) error
+	CreateNewLanguage(project dao.Project, languageCode string) (string, error)
+	GetLanguages(project dao.Project) ([]string, error)
 }
 
 func GetHandler(fileType string) fileHandler {

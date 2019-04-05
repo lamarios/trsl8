@@ -2,14 +2,21 @@ package fileHandlers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/Jeffail/gabs"
+	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/translator/git"
 	"io/ioutil"
+	"path/filepath"
+	"strings"
 )
 
 type JsonHandler struct{}
 
-func (j JsonHandler) GetStrings(fileLocation string) (map[string]string, error) {
-	content, e := GetFileContent(fileLocation)
+const ext = ".json"
+
+func (j JsonHandler) GetStrings(project dao.Project, language string) (map[string]string, error) {
+	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
 	if e != nil {
 		return nil, e
 	}
@@ -33,8 +40,8 @@ func (j JsonHandler) GetStrings(fileLocation string) (map[string]string, error) 
 	return strings, nil
 }
 
-func (j JsonHandler) GetString(fileLocation string, term string) (string, error) {
-	content, e := GetFileContent(fileLocation)
+func (j JsonHandler) GetString(project dao.Project, language string, term string) (string, error) {
+	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
 	if e != nil {
 		return "", e
 	}
@@ -65,8 +72,8 @@ func (j JsonHandler) GetString(fileLocation string, term string) (string, error)
 
 }
 
-func (j JsonHandler) GetTerms(fileLocation string) ([]string, error) {
-	content, e := GetFileContent(fileLocation)
+func (j JsonHandler) GetTerms(project dao.Project, language string) ([]string, error) {
+	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
 	if e != nil {
 		return nil, e
 	}
@@ -90,9 +97,9 @@ func (j JsonHandler) GetTerms(fileLocation string) ([]string, error) {
 	return terms, nil
 }
 
-func (j JsonHandler) UpdateString(fileLocation string, term string, value string) error {
+func (j JsonHandler) UpdateString(project dao.Project, language string, term string, value string) error {
 
-	content, e := GetFileContent(fileLocation)
+	content, e := GetFileContent(git.GetRepoRoot(project) + language + ext)
 	if e != nil {
 		return e
 	}
@@ -105,15 +112,39 @@ func (j JsonHandler) UpdateString(fileLocation string, term string, value string
 
 	jsonParsed.Set(value, term)
 
-	err := ioutil.WriteFile(fileLocation, []byte(jsonParsed.StringIndent("", "  ")), 0644)
+	err := ioutil.WriteFile(language+ext, []byte(jsonParsed.StringIndent("", "  ")), 0644)
 
 	return err
 }
-func (j JsonHandler) CreateNewLanguage(repoRoot string, languageCode string) (string, error) {
+func (j JsonHandler) CreateNewLanguage(project dao.Project, languageCode string) (string, error) {
 	jsonParsed := gabs.New()
 
 	fileName := languageCode + ".json"
-	file := repoRoot + "/" + fileName
+	file := git.GetRepoRoot(project) + "/" + fileName
 	err := ioutil.WriteFile(file, []byte(jsonParsed.StringIndent("", "  ")), 0644)
 	return fileName, err
+}
+
+func (j JsonHandler) UpdateTerm(project dao.Project, language string, new string, old string) error {
+	return nil
+}
+
+func (j JsonHandler) GetLanguages(project dao.Project) ([]string, error) {
+	dir := fmt.Sprint(project.ID)
+	files, err := git.GetRepoFiles(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var languages []string
+
+	for _, f := range files {
+
+		language := strings.TrimSuffix(f, filepath.Ext(f))
+
+		languages = append(languages, language)
+	}
+
+	return languages, nil
+
 }

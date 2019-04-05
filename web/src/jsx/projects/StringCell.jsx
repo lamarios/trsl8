@@ -31,7 +31,7 @@ export default class StringCell extends React.Component {
     }
 
     onValueChanged(e) {
-
+console.log('props', this.props, 'value', e.target.value);
         this.props.onChange(this.props.term, this.props.language, e.target.value);
 
 

@@ -7,7 +7,7 @@ cursor: pointer;
 `;
 
 const Actions = styled.div`
-color: ${props => props.theme.colors.primary.NeutralLight};
+color: ${props => props.theme.colors.primary.lightest};
 align-items: center;
 `;
 

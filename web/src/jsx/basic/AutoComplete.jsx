@@ -56,7 +56,7 @@ export default class AutoComplete extends React.Component {
         return (<Container>
             <TextInput type="text" placeholder="Search" name="test" value={this.state.search} onChange={(e) => this.inputChanged(e.target.value)}/>
             {this.state.showDropdown && this.state.options.length > 0 &&
-            <Dropdown dismiss={() => this.setState({showDropdown: false})}>
+            <Dropdown className={"dropdown"} dismiss={() => this.setState({showDropdown: false})}>
                 {this.state.options.map(o => <Option key={o.key} onClick={() => this.selectValue(o.value)}>{o.label}</Option>)}
             </Dropdown>}
         </Container>)

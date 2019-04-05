@@ -82,7 +82,7 @@ func SearchUser(search string) []User {
 
 	search = "%" + search + "%"
 	var users []User
-	db.Where("first_name LIKE ? OR last_name LIKE ? OR username LIKE ?", search, search, search).Find(&users)
+	db.Where("first_name LIKE ? OR last_name LIKE ? OR email LIKE ?", search, search, search).Find(&users)
 
 	return users
 }

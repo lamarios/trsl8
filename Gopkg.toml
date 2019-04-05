@@ -52,3 +52,11 @@
 [prune]
   go-tests = true
   unused-packages = true
+
+[[constraint]]
+  name = "github.com/Jeffail/tunny"
+  version = "0.1.2"
+
+[[constraint]]
+  name = "github.com/rs/xid"
+  version = "1.2.1"

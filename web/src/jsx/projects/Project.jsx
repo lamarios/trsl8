@@ -1,27 +1,27 @@
-import React from 'react';
-import styled from 'styled-components'
+import React from "react";
+import styled from "styled-components";
 import Service from "../Service";
 import Title from "../basic/Title";
 import TextInput from "../basic/TextInput";
-import update from 'immutability-helper';
-import Checkbox from "../basic/Checkbox";
+import update from "immutability-helper";
 import Pagination from "../basic/Pagination";
-import MultiSelect from "../basic/MultiSelect";
 import Loading from "../basic/Loading";
-import TextArea from "../basic/TextArea";
 import PrimaryButton from "../basic/PrimaryButton";
 import OkDialog from "../basic/OkDialog";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus, faTimes} from "@fortawesome/free-solid-svg-icons";
+import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import NewLanguageDialog from "./NewLanguageDialog";
 import ProjectUsers from "./ProjectUsers";
-import Select from "../basic/Select";
 import StringCell from "./StringCell";
 import LanguageSelector from "./LanguageSelector";
+import ProjectFilter from "./ProjectFilter";
+import CreateNewTerm from "./CreateNewTerm";
+import ProgressBar from "../basic/ProgressBar";
 
 
 const TitleBar = styled.div`
   display: flex;
+  align-items: center;
 `;
 
 const ProjectTitle = styled(Title)`
@@ -34,13 +34,17 @@ const TranslationContainer = styled.table`
     border-collapse: collapse;
     min-width: 100%;
     border:none;
-    
+
     thead{
         tr > th {
             text-align: left;
             border-bottom: 1px solid ${props => props.theme.colors.text.light};
         }
-    } 
+    }
+    
+    tr, td{
+        height: 36px;
+    }
 `;
 
 
@@ -49,23 +53,19 @@ cursor: pointer;
 `;
 
 
-const Filters = styled.div`
-display: flex;
-align-items: center;
-margin-bottom:10px;
-  & > * {
-    margin: 0px 10px;
-  }
-`;
-
-
 const TableContainer = styled.div`
 position: relative;
 `;
 
 const TranslationLoading = styled.td`
-font-size: 80px;
+font-size: 40px;
 text-align: center;
+`;
+
+const AddLanguageColumnButton = styled.div`
+  color: ${props => props.theme.colors.primary.main};
+  padding: 10px;
+  cursor: pointer;
 `;
 
 
@@ -80,16 +80,13 @@ export default class Project extends React.Component {
             renderedTerms: [],
             renderedTranslations: {},
             page: 0,
-            pageSize: 30,
-            filter: '',
+            pageSize: 20,
+            filter: "",
             onlyMissing: false,
             totalFilteredTerms: 0,
             filteredLanguages: [],
             languages: [],
             languageLoadings: {},
-            newTerm: '',
-            showError: false,
-            errorMessage: '',
             showNewLanguageDialog: false,
         };
         this.service = new Service();
@@ -99,7 +96,7 @@ export default class Project extends React.Component {
         this.renderPage = this.renderPage.bind(this);
         this.changePage = this.changePage.bind(this);
         this.changeFilteredLanguages = this.changeFilteredLanguages.bind(this);
-        this.createNewTerm = this.createNewTerm.bind(this);
+        this.onNewTerm = this.onNewTerm.bind(this);
         this.addLanguage = this.addLanguage.bind(this);
         this.removeLanguage = this.removeLanguage.bind(this);
         this.addLanguageColumn = this.addLanguageColumn.bind(this);
@@ -112,7 +109,7 @@ export default class Project extends React.Component {
 
     componentDidUpdate(prevProps) {
         if (this.props.match.params.id !== prevProps.match.params.id) {
-            this.getProject()
+            this.getProject();
         }
     }
 
@@ -129,9 +126,9 @@ export default class Project extends React.Component {
                     filteredLanguages: filteredLanguages
                 }, () => {
                     this.renderPage();
-                })
+                });
             }).catch(res => {
-            res.then(err => err.then(json => this.setState({showError: true, errorMessage: json})))
+            res.then(err => err.then(json => this.setState({showError: true, errorMessage: json})));
         });
     }
 
@@ -166,19 +163,12 @@ export default class Project extends React.Component {
         this.setState({filteredLanguages: filteredLanguages, translations: translations}, () => this.renderPage());
     }
 
-    createNewTerm() {
-        let term = this.state.newTerm;
+    onNewTerm(term) {
         if (term.length > 0) {
+            let terms = this.state.terms;
+            terms.push(term);
 
-            this.service.createTerm(this.state.project.ID, term)
-                .then(json => {
-                    let terms = this.state.terms;
-                    terms.push(term)
-
-                    this.setState({terms: terms, newTerm: ''}, () => this.renderPage())
-                }).catch(res => res.then(err => this.setState({showError: true, errorMessage: err})));
-        } else {
-            this.setState({showError: true, errorMessage: 'Please input something as a term'})
+            this.setState({terms: terms, newTerm: ""}, () => this.renderPage());
         }
     }
 
@@ -222,7 +212,10 @@ export default class Project extends React.Component {
     }
 
     filterTerms(terms) {
-        return terms
+        let start = this.state.page * this.state.pageSize;
+        let end = start + this.state.pageSize;
+
+        let slicedTerms = terms
             .filter(s => this.state.filter.length === 0 || s.toUpperCase().replace("_", " ").includes(this.state.filter.toUpperCase()))
             .filter(s => {
                 if (this.state.onlyMissing) {
@@ -241,19 +234,15 @@ export default class Project extends React.Component {
                     return true;
                 }
             });
+
+        this.setState({totalFilteredTerms: slicedTerms.length});
+        return slicedTerms.slice(start, end);
     }
 
     renderPage() {
 
-        let start = this.state.page * this.state.pageSize;
-        let end = start + this.state.pageSize;
-
         //reducing the items displayed
         let slicedTerms = this.filterTerms(this.state.terms);
-
-        let totalFilteredTerms = slicedTerms.length;
-
-        slicedTerms = slicedTerms.slice(start, end);
 
 
         let renderedTranslations = {};
@@ -262,22 +251,37 @@ export default class Project extends React.Component {
             renderedTranslations[key] = {};
             slicedTerms.forEach(t => {
                 renderedTranslations[key][t] = this.state.translations[key][t];
-            })
+            });
         });
 
 
         this.setState({
             renderedTranslations: renderedTranslations,
             renderedTerms: slicedTerms,
-            totalFilteredTerms: totalFilteredTerms
         });
 
     }
 
     stringUpdated(term, language, value) {
+        console.log(term, language, value);
+        const renderedTranslations = this.state.renderedTranslations;
+        const translations = this.state.translations;
+
+        if (renderedTranslations[language] === undefined) {
+            renderedTranslations[language] = {};
+        }
+
+        if (translations[language] === undefined) {
+            translations[language] = {};
+        }
+
+        renderedTranslations[language][term] = value;
+        translations[language][term] = value;
+
+
         this.setState({
-            renderedTranslations: update(this.state.renderedTranslations, {[language]: {[term]: {$set: value}}}),
-            translations: update(this.state.translations, {[language]: {[term]: {$set: value}}})
+            renderedTranslations,
+            translations
         },);
     }
 
@@ -317,7 +321,7 @@ export default class Project extends React.Component {
                                     });
                             });
                         });
-                })
+                });
             });
     }
 
@@ -331,45 +335,59 @@ export default class Project extends React.Component {
                     <ProjectTitle>
                         {this.state.project.Name}
                     </ProjectTitle>
+                    <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
+                        <FontAwesomeIcon icon={faPlus}/>
+                        &nbsp;New language
+                    </NewLanguageButton>
                     <ProjectUsers project={this.state.project} onUsersChanged={() => this.getProject(false)}/>
                 </TitleBar>
-                <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
-                    <FontAwesomeIcon icon={faPlus}/>
-                    &nbsp;Add new language
-                </NewLanguageButton>
-                <Filters>
-                    <div>Filter:</div>
-                    <TextInput id={"filter"} value={this.state.filter}
-                               onChange={(e) => this.setState({
-                                   filter: e.target.value,
-                                   page: 0
-                               }, () => this.renderPage())}/>
-                    <Checkbox value={this.state.onlyMissing}
-                              label="Show only Missing"
-                              onChange={(e) => this.setState({
-                                  onlyMissing: e.target.checked,
-                                  page: 0
-                              }, () => this.renderPage())}/>
-                </Filters>
+                <ProjectFilter
+                    filter={this.state.filter}
+                    onFilterChanged={(value => this.setState({
+                        filter: value,
+                        page: 0
+                    }, () => this.renderPage()))}
+                    onlyMissing={this.state.onlyMissing}
+                    onlyMissingChanged={value => this.setState({
+                        onlyMissing: value,
+                        page: 0
+                    }, () => this.renderPage())}
+                />
 
-                < TableContainer>
-                    < TranslationContainer>
-                        < thead>
-                        < tr>
-                            < th> Terms < /th>
-                                {languages.map((lang, index) =>
-                                    <LanguageSelector key={lang}
-                                                      value={lang}
+                <TableContainer>
+                    <TranslationContainer>
+                        <thead>
+                        <tr>
+                            <th> Terms</th>
+                            {languages.map((lang, index) =>
+                                <LanguageSelector key={lang}
+                                                  value={lang}
 
-                                                      options={this.state.languages.filter(s => languages.indexOf(s) === -1)}
-                                                      onChange={(value) => this.changeFilteredLanguages(value, index)}
-                                                      showRemove={languages.length > 1}
-                                                      onRemove={(lang) => this.removeLanguage(lang)}
-                                    />
-                                )}
+                                                  options={this.state.languages.filter(s => languages.indexOf(s) === -1)}
+                                                  onChange={(value) => this.changeFilteredLanguages(value, index)}
+                                                  showRemove={languages.length > 1}
+                                                  onRemove={(lang) => this.removeLanguage(lang)}
+                                />
+                            )}
                         </tr>
                         </thead>
                         <tbody>
+                        <tr>
+                            <td></td>
+                            {languages.map((lang, index) => {
+                                let progress = 0;
+                                if (this.state.translations[lang] !== undefined) {
+                                    progress = Object.keys(this.state.translations[lang])
+                                        .filter(k => this.state.translations[lang][k].length > 0)
+                                        .length;
+
+                                    progress = Math.min(progress, this.state.terms.length);
+                                }
+                                return <td key={lang}>
+                                    <ProgressBar value={progress} max={this.state.terms.length}/>
+                                </td>;
+                            })}
+                        </tr>
                         {this.state.renderedTerms.map((t, index) => <tr key={t}>
                             <td>{t}</td>
                             {languages.map((l) => {
@@ -379,33 +397,32 @@ export default class Project extends React.Component {
                                         if (index === 0) {
                                             return <TranslationLoading key={l} rowSpan={this.state.renderedTerms.length}>
                                                 <Loading/>
-                                            </TranslationLoading>
+                                            </TranslationLoading>;
                                         } else {
                                             return null;
                                         }
                                     } else {
                                         return <StringCell key={l}
                                                            value={this.state.renderedTranslations[l] !== undefined
-                                                               ? this.state.renderedTranslations[l][t] : ''}
+                                                               ? this.state.renderedTranslations[l][t] : ""}
                                                            onChange={this.stringUpdated}
                                                            language={l}
                                                            term={t}
                                                            project={this.state.project}
-                                        />
+                                        />;
                                     }
                                 }
                             )}
                             {index === 0 && languages.length < this.state.languages.length &&
                             <td rowSpan={this.state.renderedTerms.length}>
-                                <FontAwesomeIcon icon={faPlus} onClick={this.addLanguageColumn}/>
+                                <AddLanguageColumnButton onClick={this.addLanguageColumn}>
+                                    <FontAwesomeIcon icon={faPlus}/>
+                                </AddLanguageColumnButton>
                             </td>}
                         </tr>)}
 
                         <tr>
                             <td colSpan={this.state.filteredLanguages.length + 1}>
-                                Create term: <TextInput value={this.state.newTerm}
-                                                        onChange={(e) => this.setState({newTerm: e.target.value})}/>
-                                <PrimaryButton onClick={this.createNewTerm}>Add</PrimaryButton>
                             </td>
                         </tr>
 
@@ -413,17 +430,18 @@ export default class Project extends React.Component {
                     </TranslationContainer>
                     <Pagination page={this.state.page} onPageChange={this.changePage}
                                 itemCount={this.state.totalFilteredTerms} pageSize={this.state.pageSize}/>
+                    <CreateNewTerm onNewTerm={this.onNewTerm} project={this.state.project}/>
                 </TableContainer>
             </div>}
 
-                {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
-                    {this.state.errorMessage}
-                </OkDialog>}
-                {this.state.showNewLanguageDialog &&
-                <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
-                                   addLanguage={this.addLanguage}
-                                   existingLanguages={Object.keys(this.state.translations)}/>}
-                </div>)
-                }
+            {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
+                {this.state.errorMessage}
+            </OkDialog>}
+            {this.state.showNewLanguageDialog &&
+            <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
+                               addLanguage={this.addLanguage}
+                               existingLanguages={Object.keys(this.state.translations)}/>}
+        </div>);
+    }
 
-                }
+}

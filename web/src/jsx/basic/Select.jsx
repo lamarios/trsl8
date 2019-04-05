@@ -65,12 +65,12 @@ export default class Select extends React.Component {
     }
 
     toggleDropDown() {
-        this.setState({showDropDown: !this.state.showDropDown});
+        this.setState({showPanel: !this.state.showPanel});
     }
 
     toggleValue(value) {
         this.props.onChange(value);
-        this.setState({showDropDown: false});
+        this.setState({showPanel: false});
     }
 
     render() {
@@ -82,7 +82,7 @@ export default class Select extends React.Component {
                 : <span>{this.props.value}</span>}
                 <Chevron icon={faChevronDown}/></Input>
 
-            {this.state.showDropDown &&
+            {this.state.showPanel &&
             <Dropdown dismiss={this.toggleDropDown}>
                 <Options>
                     {this.props.options.map((o, k) => {

@@ -28,7 +28,7 @@ export default class Login extends React.Component {
             .then(res => {
                 console.log(res);
                 window.localStorage.setItem("token", res);
-                window.location.href = "/";
+                window.location.href = "/projects";
             })
     }
 

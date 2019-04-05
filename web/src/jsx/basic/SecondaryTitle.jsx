@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 const H2 = styled.h2`
   padding:0;
-  margin:0px 0px 10px 0px;
+  margin:0px 0px 5px 0px;
   font-size: 1.1rem;
   font-weight: normal;
   color: ${props => props.theme.colors.text.title};

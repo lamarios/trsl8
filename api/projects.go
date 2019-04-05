@@ -8,6 +8,7 @@ import (
 	"github.com/lamarios/translator/fileHandlers"
 	"github.com/lamarios/translator/git"
 	"github.com/lamarios/translator/utils"
+	"github.com/rs/xid"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -16,6 +17,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type UpdateString struct {
@@ -27,24 +29,14 @@ type UpdateString struct {
 type ProjectStatus struct {
 }
 
+var (
+	projectPushMap = make(map[uint]xid.ID)
+)
+
 func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-
-	//getting project t osee if user can access
-	projectId, err := strconv.ParseUint(vars["project"], 10, 32)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't parse project Id")
-		return
-	}
-
-	project, err := dao.GetProject(user, uint(projectId))
+	project, err := GetProjectForUser(user, true, w, r)
 	if err != nil {
 		WebError(w, err, 500, "Couldn't get project")
-		return
-	}
-
-	if project.OwnerID != user.ID {
-		WebError(w, err, 401, "Not allowed to see this repo")
 		return
 	}
 
@@ -54,25 +46,23 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 		return
 	}
 
-	dir := vars["project"]
-	files, err := git.GetRepoFiles(dir)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't get project files")
-		return
-	}
-
 	fileContent := make(map[string]string)
 
 	fileHandler := fileHandlers.GetHandler(project.FileType)
+	languages := fileHandler.GetLanguages(project)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't get project languages")
+		return
+	}
+
+	vars := mux.Vars(r)
 
 	language1 := vars["language"]
 
-	for _, f := range files {
-
-		language := strings.TrimSuffix(f, filepath.Ext(f))
+	for _, language := range languages {
 
 		if language == language1 {
-			content, err := fileHandler.GetStrings(git.CloneRoot + "/" + dir + "/" + f)
+			content, err := fileHandler.GetStrings(project, language)
 			if err == nil {
 				// probably empty file
 				fileContent = content
@@ -184,7 +174,7 @@ func GetProjectStatusHandler(user dao.UserFull, w http.ResponseWriter, r *http.R
 
 }
 
-func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
+func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	project, e := GetProjectForUser(user, true, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
@@ -208,7 +198,6 @@ func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	fmt.Print(file)
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	// we pull changes before committing to be sure we have everything up to date, trying to avoid conflicts as much as possible
@@ -230,11 +219,7 @@ func UpdateTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	err = git.Push(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't push")
-		return
-	}
+	go pushProject(project)
 
 	ToJson(commitChanges.String(), w)
 }
@@ -334,7 +319,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	git.Push(project)
+	go pushProject(project)
 
 	ToJson(commit.String(), w)
 }
@@ -379,9 +364,10 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	// checking if term already exists
-	existingValue, err := handler.GetString(file, term)
+	_, err = handler.GetString(file, term)
 	if err == nil {
-		WebError(w, err, 500, "Term already exists with value "+existingValue)
+		error := errors.New("Term already exists")
+		WebError(w, error, 500, "")
 		return
 	}
 
@@ -393,7 +379,7 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	git.Push(project)
+	go pushProject(project)
 
 	ToJson(commitChanges.String(), w)
 }
@@ -458,4 +444,20 @@ func RemoveUserFromProjectHandler(user dao.UserFull, w http.ResponseWriter, r *h
 
 	ToJson(updatedProject, w)
 
+}
+
+func pushProject(project dao.Project) {
+	id := xid.New()
+	projectPushMap[project.ID] = id
+
+	time.Sleep(10 * time.Second)
+
+	if projectPushMap[project.ID] == id {
+		delete(projectPushMap, project.ID)
+		log.Print("Pushing repo: ", project.ID)
+		git.Push(project)
+		log.Print("Done pushing ", project.ID)
+	} else {
+		log.Print("Project ", project.ID, ": Another push is coming later, skipping")
+	}
 }

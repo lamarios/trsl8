@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import Service from '../Service';
+import React from "react";
+import styled from "styled-components";
+import Service from "../Service";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlus, faUsers, faTimes} from "@fortawesome/free-solid-svg-icons";
 import Dropdown from "../basic/Dropdown";
@@ -25,12 +25,25 @@ margin: 0 5px;
 
 const PanelTitle = styled(Title)`
 color: ${props => props.theme.colors.background};
+margin-bottom: 20px;
 `;
 
 
 const Users = styled.div`
 display: flex;
 flex-direction: column;
+margin-bottom: 20px;
+`;
+
+
+const Panel = styled.div`
+`;
+
+const AutoCompleteContainer = styled.div`
+
+  .dropdown{
+  color: ${props => props.theme.colors.text.main};
+  }
 `;
 
 
@@ -38,7 +51,7 @@ export default class ProjectUsers extends React.Component {
     constructor(props) {
         super(props);
 
-        this.state = {showDropDown: false};
+        this.state = {showPanel: false};
         this.removeUser = this.removeUser.bind(this);
         this.getAutoCompleteValues = this.getAutoCompleteValues.bind(this);
         this.addUser = this.addUser.bind(this);
@@ -58,15 +71,15 @@ export default class ProjectUsers extends React.Component {
                     .map(u => {
                         return {
                             key: u.ID,
-                            label: u.FirstName + ' ' + u.LastName,
+                            label: u.FirstName + " " + u.LastName,
                             value: u
-                        }
-                    })
+                        };
+                    });
 
                 return new Promise((resolve, reject) => {
                     resolve(values);
                 });
-            })
+            });
     }
 
     addUser(user) {
@@ -76,37 +89,41 @@ export default class ProjectUsers extends React.Component {
 
     render() {
         const project = this.props.project;
-        return (<div>
-            <Container onClick={() => this.setState({showDropDown: !this.state.showDropDown})}>
+        return (<Panel>
+            <Container onClick={() => this.setState({showPanel: !this.state.showPanel})}>
                 <FaIcon icon={faUsers}/>
+                &nbsp;
                 {project.Users.length}
             </Container>
 
-            {this.state.showDropDown && <SidePanel dismiss={() => this.setState({showDropDown: false})}>
+            {this.state.showPanel && <SidePanel dismiss={() => this.setState({showPanel: false})}>
                 {/*{project.Users.map(u => <UserPill key={u.User.ID} user={u.User}/>)}*/}
                 <PanelTitle>
                     <FontAwesomeIcon icon={faUsers}/>
+                    &nbsp;
                     Contributors
                 </PanelTitle>
                 <Users>
                     {project.Users.map((u) => {
                         let actions = [];
-                        if (project.isOwner ) {
+                        if (project.isOwner) {
                             actions = [{
                                 icon: faTimes,
-                                name: 'remove',
+                                name: "remove",
                                 onClick: () => this.removeUser(u.User.ID)
                             }];
                         }
 
-                        return <UserPill key={u.ID} user={u.User} actions={actions}/>
+                        return <UserPill key={u.ID} user={u.User} actions={actions}/>;
                     })}
                 </Users>
                 {project.isOwner && <div>
                     Add contributors:
-                    <AutoComplete getOptionsPromise={this.getAutoCompleteValues} onSelected={this.addUser}/>
+                    <AutoCompleteContainer>
+                        <AutoComplete getOptionsPromise={this.getAutoCompleteValues} onSelected={this.addUser}/>
+                    </AutoCompleteContainer>
                 </div>}
             </SidePanel>}
-        </div>);
+        </Panel>);
     }
 }
