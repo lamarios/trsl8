@@ -32,7 +32,7 @@ export default class ProjectList extends React.Component {
             <ProjectTableHead>
                 <tr>
                     <th>Name</th>
-                    <th>Progress (top 3)</th>
+                    <th>Progress</th>
                 </tr>
             </ProjectTableHead>
             <tbody>

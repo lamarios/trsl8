@@ -14,8 +14,7 @@ const Progress = styled.div`
   background-color: ${props => props.theme.colors.primary.lightest};
   height: 100%;
   border-radius: 5px;
-  animation:  ${props => widthGrow(props)} 1s ease-in-out;
-  transition: width 0.5s ease-in-out;
+  animation:  ${props => widthGrow(props)} 0.5s ease-in-out;
 `;
 
 export default class ProgressBar extends React.Component {
