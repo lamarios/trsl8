@@ -256,7 +256,7 @@ func GetAllProjectsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Req
 	log.Print(user.ID)
 	projects := dao.GetAllProjects(user)
 
-	var projectLight []dao.ProjectLight
+	projectLight := make([]dao.ProjectLight, 0)
 
 	for _, p := range projects {
 		projectLight = append(projectLight, p.ProjectLight)
