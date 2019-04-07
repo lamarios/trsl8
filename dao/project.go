@@ -1,19 +1,23 @@
 package dao
 
 type Project struct {
+	ProjectLight
+	Username   string
+	Password   string
+	PrivateKey string `sql:"type:text;"`
+	PublicKey  string `sql:"type:text;"`
+}
+
+type ProjectLight struct {
 	ID           uint `gorm:"primary_key"`
 	GitUrl       string
 	Name         string
 	Ssh          bool
-	Username     string
-	Password     string
 	MainLanguage string
 	Owner        User
 	OwnerID      uint
 	Users        []ProjectUser `gorm:"foreignkey:ProjectId"`
 	FileType     string
-	PrivateKey   string `sql:"type:text;"`
-	PublicKey    string `sql:"type:text;"`
 }
 
 type ProjectUser struct {

@@ -24,7 +24,10 @@ export default class ProgressBar extends React.Component {
 
 
     render() {
-        const percentage = this.props.percent ? this.props.percent :  (this.props.value * 100 / this.props.max);
+        let percentage = this.props.percent ? this.props.percent :  (this.props.value * 100 / this.props.max);
+        percentage = Math.min(100, percentage);
+        percentage = Math.max(0, percentage);
+
 
         return (<Container>
             {percentage > 0 && <Progress percentage={percentage}/>}

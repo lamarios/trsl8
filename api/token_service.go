@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/dao"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"

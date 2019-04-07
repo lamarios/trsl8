@@ -1,7 +1,7 @@
 package fileHandlers
 
 import (
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/dao"
 	"io/ioutil"
 )
 

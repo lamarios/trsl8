@@ -2,7 +2,7 @@ package git
 
 import (
 	"fmt"
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/dao"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
@@ -11,6 +11,7 @@ import (
 	gitssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -19,6 +20,10 @@ import (
 const (
 	CloneRoot = "./repos"
 )
+
+func acceptAllHosts(hostname string, remote net.Addr, key ssh.PublicKey) error {
+	return nil
+}
 
 func CloneRepo(project dao.Project, dir string) (*git.Repository, error) {
 	os.MkdirAll(CloneRoot, os.ModePerm)
@@ -36,7 +41,13 @@ func CloneRepo(project dao.Project, dir string) (*git.Repository, error) {
 		}
 	} else {
 		signer, _ := ssh.ParsePrivateKey([]byte(project.PrivateKey))
-		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
+
+		var helper = gitssh.HostKeyCallbackHelper{
+			HostKeyCallback: acceptAllHosts,
+		}
+
+		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer, HostKeyCallbackHelper: helper}
+		//options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
 	}
 
 	return git.PlainClone(dir, false, options)
@@ -75,7 +86,14 @@ func Pull(project dao.Project) error {
 		}
 	} else {
 		signer, _ := ssh.ParsePrivateKey([]byte(project.PrivateKey))
-		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
+
+		var helper = gitssh.HostKeyCallbackHelper{
+			HostKeyCallback: acceptAllHosts,
+		}
+
+		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer, HostKeyCallbackHelper: helper}
+		//options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
+
 	}
 	// Opens an already existing repository.
 	r, err := git.PlainOpen(directory)
@@ -160,7 +178,13 @@ func Push(project dao.Project) error {
 		}
 	} else {
 		signer, _ := ssh.ParsePrivateKey([]byte(project.PrivateKey))
-		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
+
+		var helper = gitssh.HostKeyCallbackHelper{
+			HostKeyCallback: acceptAllHosts,
+		}
+
+		options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer, HostKeyCallbackHelper: helper}
+		//options.Auth = &gitssh.PublicKeys{User: "git", Signer: signer}
 	}
 	// push using default options
 	err = r.Push(&options)

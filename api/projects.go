@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/lamarios/translator/dao"
-	"github.com/lamarios/translator/fileHandlers"
-	"github.com/lamarios/translator/git"
-	"github.com/lamarios/translator/utils"
+	"github.com/lamarios/trsl8/dao"
+	"github.com/lamarios/trsl8/fileHandlers"
+	"github.com/lamarios/trsl8/git"
+	"github.com/lamarios/trsl8/utils"
 	"github.com/rs/xid"
 	"io/ioutil"
 	"log"
@@ -228,7 +228,7 @@ func GetProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	ToJson(&project, w)
+	ToJson(&project.ProjectLight, w)
 }
 func GetProjectLanguagesHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	project, err := GetProjectForUser(user, true, w, r)
@@ -254,7 +254,15 @@ func GetProjectLanguagesHandler(user dao.UserFull, w http.ResponseWriter, r *htt
 
 func GetAllProjectsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	log.Print(user.ID)
-	ToJson(dao.GetAllProjects(user), w)
+	projects := dao.GetAllProjects(user)
+
+	var projectLight []dao.ProjectLight
+
+	for _, p := range projects {
+		projectLight = append(projectLight, p.ProjectLight)
+	}
+
+	ToJson(projectLight, w)
 }
 
 func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
@@ -285,7 +293,7 @@ func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 
 	git.CloneRepo(project, fmt.Sprint(project.ID))
 
-	ToJson(&project, w)
+	ToJson(&project.ProjectLight, w)
 }
 
 func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
@@ -294,7 +302,7 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 
 	log.Printf("Checkign repo %s", project.GitUrl)
 
-	dir, err := ioutil.TempDir("", "translator-repo-test")
+	dir, err := ioutil.TempDir("", "trsl8-repo-test")
 	log.Printf("Cloning in %d", dir)
 
 	_, err = git.CloneRepo(project, dir)
@@ -570,8 +578,12 @@ func pushProject(project dao.Project) {
 	if projectPushMap[project.ID] == id {
 		delete(projectPushMap, project.ID)
 		log.Print("Pushing repo: ", project.ID)
-		git.Push(project)
-		log.Print("Done pushing ", project.ID)
+		err := git.Push(project)
+		if err == nil {
+			log.Print("Done pushing ", project.ID)
+		} else {
+			log.Printf("error while pushing %s", err)
+		}
 	} else {
 		log.Print("Project ", project.ID, ": Another push is coming later, skipping")
 	}

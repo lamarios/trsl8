@@ -1,8 +1,28 @@
 package dao
 
 import (
+	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"github.com/lamarios/trsl8/utils"
 )
+
+type DB struct {
+	Type         string
+	Url          string
+	DatabaseName string
+	Username     string
+	Password     string
+}
+
+var config = DB{
+	Type:         utils.GetEnv("DB_TYPE", "sqlite3"),
+	Url:          utils.GetEnv("DB_URL", "trsl8.db"),
+	DatabaseName: utils.GetEnv("DB_NAME", ""),
+	Username:     utils.GetEnv("DB_USERNAME", ""),
+	Password:     utils.GetEnv("DB_PASSWORD", ""),
+}
 
 func SetUp() {
 	db := GetConnection()
@@ -15,9 +35,18 @@ func SetUp() {
 }
 
 func GetConnection() *gorm.DB {
-	db, err := gorm.Open("sqlite3", "translator.db")
+
+	var arguments string
+	switch config.Type {
+	case "sqlite3":
+		arguments = config.Url
+	case "mysql":
+		arguments = config.Username + ":" + config.Password + "@tcp(" + config.Url + ")/" + config.DatabaseName + "?charset=utf8&parseTime=True&loc=Local"
+	}
+
+	db, err := gorm.Open(config.Type, arguments)
 	if err != nil {
-		panic("failed to connect database")
+		panic(err)
 	}
 	//db.LogMode(true)
 	return db

@@ -3,6 +3,7 @@ package utils
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"os"
 	"strconv"
 )
 
@@ -18,4 +19,11 @@ func StringToUint(string string) (uint, error) {
 	}
 
 	return uint(myInt), nil
+}
+
+func GetEnv(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
 }

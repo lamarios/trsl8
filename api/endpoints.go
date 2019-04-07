@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/dao"
 	"io"
 	"io/ioutil"
 	"log"

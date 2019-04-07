@@ -2,8 +2,8 @@ package api
 
 import (
 	"errors"
-	"github.com/lamarios/translator/dao"
-	"github.com/lamarios/translator/utils"
+	"github.com/lamarios/trsl8/dao"
+	"github.com/lamarios/trsl8/utils"
 	"log"
 	"net/http"
 )

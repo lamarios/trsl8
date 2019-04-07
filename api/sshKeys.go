@@ -5,7 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"encoding/pem"
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/dao"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"log"

@@ -4,8 +4,9 @@ import (
 	"flag"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/lamarios/translator/api"
-	"github.com/lamarios/translator/dao"
+	"github.com/lamarios/trsl8/api"
+	"github.com/lamarios/trsl8/dao"
+	"github.com/lamarios/trsl8/utils"
 	"net/http"
 )
 
@@ -26,5 +27,5 @@ func DefineRoutes() {
 
 	http.Handle("/", r)
 
-	http.ListenAndServe(":8000", r)
+	http.ListenAndServe(":"+utils.GetEnv("PORT", "8000"), r)
 }
