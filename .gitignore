@@ -153,3 +153,6 @@ static
 repos
 translator.db
 vendor
+/trsl8-*.tar.gz
+/trsl8
+/docker/trsl8
