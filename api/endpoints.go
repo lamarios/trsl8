@@ -17,6 +17,7 @@ func DefineEndPoints(r *mux.Router) {
 	r.HandleFunc("/sign-up", ServeIndexHandler)
 	r.HandleFunc("/projects/{id}", ServeIndexHandler)
 	r.HandleFunc("/projects", ServeIndexHandler)
+	r.HandleFunc("/static/{path}", ServeStaticHandler)
 
 	r.HandleFunc("/login-submit", Login).Methods("POST")
 
@@ -106,6 +107,19 @@ func ServeIndexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		WebError(w, err, 500, "")
 	} else {
-		fmt.Fprintf(w, string(dat))
+		fmt.Fprint(w, string(dat))
+	}
+}
+
+func ServeStaticHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+
+	path := vars["path"]
+
+	dat, err := ioutil.ReadFile("static/" + path)
+	if err != nil {
+		WebError(w, err, 500, "")
+	} else {
+		fmt.Fprint(w, string(dat))
 	}
 }

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/lamarios/trsl8/api"
@@ -19,11 +18,12 @@ func DefineRoutes() {
 	r := mux.NewRouter()
 	api.DefineEndPoints(r)
 
-	var dir string
+	//var dir string
+	//dir = "./static"
 
-	flag.StringVar(&dir, "dir", "./static", "the directory to serve files from. Defaults to the current dir")
-	flag.Parse()
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
+	//flag.StringVar(&dir, "dir", "./static", "the directory to serve files from. Defaults to the current dir")
+	//flag.Parse()
+	//r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(dir))))
 
 	http.Handle("/", r)
 
