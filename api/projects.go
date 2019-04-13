@@ -303,11 +303,12 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 	log.Printf("Checkign repo %s", project.GitUrl)
 
 	dir, err := ioutil.TempDir("", "trsl8-repo-test")
-	log.Printf("Cloning in %d", dir)
+	dir = filepath.ToSlash(dir)
+	log.Printf("Cloning in %s", dir)
 
 	_, err = git.CloneRepo(project, dir)
 
-	if err != nil {
+	if err != nil && err.Error() != "remote repository is empty" {
 		WebError(w, err, 500, "")
 		return
 	}
