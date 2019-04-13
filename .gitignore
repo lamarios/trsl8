@@ -152,6 +152,7 @@ typings/
 static
 repos
 translator.db
+trsl8.db
 vendor
 /trsl8-*.tar.gz
 /trsl8
