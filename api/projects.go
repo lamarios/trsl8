@@ -95,7 +95,12 @@ func GetProjectProgressHandler(user dao.UserFull, w http.ResponseWriter, r *http
 				count++
 			}
 		}
-		progress[language] = count * 100 / len(terms)
+		termSize := len(terms)
+		if termSize > 0 {
+			progress[language] = count * 100 / len(terms)
+		} else {
+			progress[language] = 0
+		}
 	}
 
 	ToJson(progress, w)
@@ -291,7 +296,20 @@ func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 
 	dao.CreateProject(&project)
 
-	git.CloneRepo(project, fmt.Sprint(project.ID))
+	_, err := git.CloneRepo(project, fmt.Sprint(project.ID))
+	if err != nil {
+		if err.Error() == "remote repository is empty" {
+			// we need to create the folder, init the repo, set upstream, create new file and commit the whole thing
+			err = git.RepoFromScratch(project)
+			if err != nil {
+				WebError(w, errors.New("Couldn;t create repo from scratch"), 500, "")
+				return
+			}
+		} else {
+			WebError(w, errors.New("Couldn;t create repo from scratch"), 500, "")
+			return
+		}
+	}
 
 	ToJson(&project.ProjectLight, w)
 }
@@ -315,8 +333,7 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 
 	availableFiles, err := git.GetRepoFiles(dir)
 	if err != nil {
-		WebError(w, err, 500, "Couldn't get repo files")
-		return
+		availableFiles = make([]string, 0)
 	}
 
 	ToJson(&availableFiles, w)

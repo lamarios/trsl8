@@ -5,6 +5,7 @@ import (
 	"github.com/lamarios/trsl8/dao"
 	"golang.org/x/crypto/ssh"
 	"gopkg.in/src-d/go-git.v4"
+	config2 "gopkg.in/src-d/go-git.v4/config"
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
@@ -51,6 +52,53 @@ func CloneRepo(project dao.Project, dir string) (*git.Repository, error) {
 	}
 
 	return git.PlainClone(dir, false, options)
+}
+
+func RepoFromScratch(project dao.Project) error {
+	dir := GetRepoRoot(project)
+	err := os.MkdirAll(dir, os.ModePerm)
+
+	if err != nil {
+		return err
+	}
+
+	newFile := project.MainLanguage + "." + project.FileType
+	err = ioutil.WriteFile(dir+newFile, []byte("{}"), 0644)
+	if err != nil {
+		return err
+	}
+
+	repository, err := git.PlainInit(dir, false)
+	if err != nil {
+		return err
+	}
+
+	var config = config2.RemoteConfig{
+		Name: "origin",
+		URLs: []string{project.GitUrl},
+	}
+
+	_, err = repository.CreateRemote(&config)
+	if err != nil {
+		return err
+	}
+
+	err = AddFile(project, newFile)
+	if err != nil {
+		return err
+	}
+
+	_, err = CommitChanges(project, "create main language file")
+	if err != nil {
+		return err
+	}
+
+	err = Push(project)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetRepoFiles(dir string) ([]string, error) {
