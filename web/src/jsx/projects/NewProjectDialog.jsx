@@ -12,7 +12,6 @@ import {faCheck} from '@fortawesome/free-solid-svg-icons'
 import {popIn, fadeIn} from '../animations'
 import OkDialog from "../basic/OkDialog";
 import Select from "../basic/Select";
-import cryptico from 'cryptico'
 import TextArea from "../basic/TextArea";
 
 const TestDiv = styled.div`

@@ -308,7 +308,7 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 	_, err = git.CloneRepo(project, dir)
 
 	if err != nil {
-		WebError(w, err, 500, "Couldn't clone repository")
+		WebError(w, err, 500, "")
 		return
 	}
 
