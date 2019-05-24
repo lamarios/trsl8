@@ -354,9 +354,9 @@ export default class Project extends React.Component {
                     </TranslationContainer>
                     <Pagination page={this.state.page} onPageChange={this.changePage}
                                 itemCount={this.state.total} pageSize={this.state.pageSize}/>
-                    <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
                 </TableContainer>
                 }
+                <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
             </div>}
 
             {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>

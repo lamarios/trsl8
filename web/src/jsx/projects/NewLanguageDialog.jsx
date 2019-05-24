@@ -48,8 +48,9 @@ export default class NewLanguageDialog extends React.Component {
     }
 
     render() {
+        const existingLanguages = this.props.existingLanguages || [];
         let filteredLanguages = this.state.filter.length > 0 ? Object.keys(LANGUAGE_BY_LOCALE)
-                .filter(k => this.props.existingLanguages.indexOf(k) === -1)
+                .filter(k => existingLanguages.indexOf(k) === -1)
                 .filter(k => {
                     const keyUp = k.toUpperCase();
                     const filterUp = this.state.filter.toUpperCase();

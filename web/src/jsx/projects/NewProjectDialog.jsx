@@ -12,8 +12,8 @@ import {faCheck} from '@fortawesome/free-solid-svg-icons'
 import {popIn, fadeIn} from '../animations'
 import OkDialog from "../basic/OkDialog";
 import Select from "../basic/Select";
-import cryptico from 'cryptico'
 import TextArea from "../basic/TextArea";
+import NewLanguageDialog from "./NewLanguageDialog";
 
 const TestDiv = styled.div`
 display: flex;
@@ -76,7 +76,7 @@ export default class NewProjectDialog extends React.Component {
             testing: false,
             testSuccess: false,
             testError: '',
-            files: [],
+            files: null,
             masterFile: '',
             saving: false,
             saveError: '',
@@ -84,6 +84,7 @@ export default class NewProjectDialog extends React.Component {
             fileType: '',
             sshPrivateKey:'',
             sshPublicKey: '',
+            showNewLanguageDialog: false
         };
 
         this.testRepo = this.testRepo.bind(this);
@@ -208,7 +209,7 @@ export default class NewProjectDialog extends React.Component {
                 {this.state.testError.length > 0 && <Fail>{this.state.testError}</Fail>}
             </TestDiv>
 
-            {this.state.files.length > 0 && <Files>
+            {this.state.files !== null && this.state.files.length > 0 && <Files>
                 <p>Choose master file</p>
                 {this.state.files.map((f, k) => <File key={k} onClick={() => this.setState({masterFile: f})}>
                     <IconSpacer>
@@ -219,9 +220,20 @@ export default class NewProjectDialog extends React.Component {
 
             </Files>}
 
+            {this.state.files !== null && this.state.files.length === 0 && <Files>
+                No language file detected:
+                <PrimaryButton onClick={() => this.setState({showNewLanguageDialog: true})}>Create first language</PrimaryButton>
+            </Files>}
+
 
             {this.state.saveError.length > 0 &&
             <OkDialog dismiss={() => this.setState({saveError: ''})}>{this.state.saveError}</OkDialog>}
+
+
+            {this.state.showNewLanguageDialog && <NewLanguageDialog
+            addLanguage={(language) => this.setState({masterFile: language, files:[language] })}
+            dismiss={() => this.setState({showNewLanguageDialog: false})}
+            />}
         </OkCancelDialog>)
     }
 

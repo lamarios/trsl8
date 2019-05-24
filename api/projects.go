@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -95,7 +94,12 @@ func GetProjectProgressHandler(user dao.UserFull, w http.ResponseWriter, r *http
 				count++
 			}
 		}
-		progress[language] = count * 100 / len(terms)
+		termSize := len(terms)
+		if termSize > 0 {
+			progress[language] = count * 100 / len(terms)
+		} else {
+			progress[language] = 0
+		}
 	}
 
 	ToJson(progress, w)
@@ -150,19 +154,18 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 				count++
 			}
 		}
-		progress[language] = count * 100 / len(terms)
+		total := len(terms)
+		if total == 0 {
+			total = 1
+		}
+		progress[language] = count * 100 / total
 	}
 
 	// now getting based on each term
 	request.Filter = strings.ToUpper(request.Filter)
 	for _, term := range terms {
-		reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		tempTerm := reg.ReplaceAllString(term, " ")
-		tempTerm = strings.ToUpper(tempTerm)
+		tempTerm := strings.ToUpper(term)
 		if strings.Contains(tempTerm, request.Filter) {
 
 			termTrans := make(map[string]string)
@@ -291,7 +294,64 @@ func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 
 	dao.CreateProject(&project)
 
-	git.CloneRepo(project, fmt.Sprint(project.ID))
+	_, err := git.CloneRepo(project, fmt.Sprint(project.ID))
+	if err != nil {
+		if err.Error() == "remote repository is empty" {
+			// we need to create the folder, init the repo, set upstream, create new file and commit the whole thing
+			err = git.RepoFromScratch(project)
+			if err != nil {
+				WebError(w, errors.New("Couldn;t create repo from scratch"), 500, "")
+				return
+			}
+		} else {
+			WebError(w, errors.New("Couldn;t create repo from scratch"), 500, "")
+			return
+		}
+	}
+
+	// checking if main language is available, otherwise create it
+	availableFiles, err := git.GetRepoFiles(fmt.Sprint(project.ID))
+	if err != nil || availableFiles == nil {
+		availableFiles = make([]string, 0)
+	}
+
+	languageAvailable := false
+	for _, f := range availableFiles {
+
+		language := strings.TrimSuffix(f, filepath.Ext(f))
+
+		if language == project.MainLanguage {
+			languageAvailable = true
+		}
+	}
+
+	if !languageAvailable {
+		handler := fileHandlers.GetHandler(project.FileType)
+
+		newFileName, e := handler.CreateNewLanguage(project, project.MainLanguage)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		e = git.AddFile(project, newFileName)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		_, e = git.CommitChanges(project, "["+user.Email+"] add new language "+project.MainLanguage)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		go pushProject(project)
+
+	}
 
 	ToJson(&project.ProjectLight, w)
 }
@@ -303,19 +363,19 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 	log.Printf("Checkign repo %s", project.GitUrl)
 
 	dir, err := ioutil.TempDir("", "trsl8-repo-test")
-	log.Printf("Cloning in %d", dir)
+	dir = filepath.ToSlash(dir)
+	log.Printf("Cloning in %s", dir)
 
 	_, err = git.CloneRepo(project, dir)
 
-	if err != nil {
-		WebError(w, err, 500, "Couldn't clone repository")
+	if err != nil && err.Error() != "remote repository is empty" {
+		WebError(w, err, 500, "")
 		return
 	}
 
 	availableFiles, err := git.GetRepoFiles(dir)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't get repo files")
-		return
+	if err != nil || availableFiles == nil {
+		availableFiles = make([]string, 0)
 	}
 
 	ToJson(&availableFiles, w)
@@ -463,7 +523,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 }
 
 func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, false, w, r)
+	project, e := GetProjectForUser(user, true, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		log.Print(e)

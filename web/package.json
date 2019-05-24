@@ -4,17 +4,19 @@
     "build": "parcel build src/index.html --public-url /static/ --out-dir ../static"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/preset-env": "^7.4.3",
+    "@babel/preset-react": "^7.0.0",
+    "eslint": "^5.16.0",
+    "eslint-plugin-import": "^2.17.0",
+    "eslint-plugin-react-app": "^4.0.1",
     "parcel-bundler": "^1.12.2"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.15",
     "@fortawesome/free-solid-svg-icons": "^5.7.2",
     "@fortawesome/react-fontawesome": "^0.1.4",
-    "cryptico": "^1.0.2",
-    "immutability-helper": "^3.0.0",
     "react": "^16.8.4",
     "react-addons-update": "^15.6.2",
     "react-dom": "^16.8.4",

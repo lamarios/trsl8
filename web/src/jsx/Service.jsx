@@ -1,32 +1,34 @@
-import {sprintf} from "sprintf-js"
+import {sprintf} from "sprintf-js";
 
+const ROOT = process.env.API_ROOT || '/';
+console.log('ROOT', ROOT);
 const ENDPOINTS = {
     USERS: {
-        LOGIN: "/login-submit"
+        LOGIN: ROOT + "/login-submit"
     },
     API: {
         USERS: {
-            SIGN_UP: "/api/users",
-            SEARCH: "/api/users/search",
-            SELF: "/api/users/self",
+            SIGN_UP: ROOT + "/api/users",
+            SEARCH: ROOT + "/api/users/search",
+            SELF: ROOT + "/api/users/self",
         },
         PROJECTS: {
-            GET_ALL: "/api/projects",
-            GET_PROGRESS: "/api/projects/%s/progress",
-            TEST: "/api/projects/test",
-            GET: "/api/projects/{id}",
-            GET_STRINGS: "/api/projects/%s/strings/all",
-            UPDATE_STRINGS: "/api/projects/%s/strings",
-            CREATE_TERM: "/api/projects/{id}/terms",
-            GET_TERM: "/api/projects/%s/terms",
-            CREATE_LANGUAGE: "/api/projects/{id}/languages",
-            GET_LANGUAGES: "/api/projects/%s/languages",
+            GET_ALL: ROOT + "/api/projects",
+            GET_PROGRESS: ROOT + "/api/projects/%s/progress",
+            TEST: ROOT + "/api/projects/test",
+            GET: ROOT + "/api/projects/{id}",
+            GET_STRINGS: ROOT + "/api/projects/%s/strings/all",
+            UPDATE_STRINGS: ROOT + "/api/projects/%s/strings",
+            CREATE_TERM: ROOT + "/api/projects/{id}/terms",
+            GET_TERM: ROOT + "/api/projects/%s/terms",
+            CREATE_LANGUAGE: ROOT + "/api/projects/{id}/languages",
+            GET_LANGUAGES: ROOT + "/api/projects/%s/languages",
             USERS: {
-                ADD: "/api/projects/{id}/users/{userId}",
+                ADD: ROOT + "/api/projects/{id}/users/{userId}",
             }
         },
         SSH: {
-            GENERATE_KEYS: "/api/ssh-keys"
+            GENERATE_KEYS: ROOT + "/api/ssh-keys"
         }
     }
 
@@ -91,7 +93,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -103,7 +105,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -116,7 +118,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -131,7 +133,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -146,7 +148,7 @@ export default class Service {
                 "Content-Type": "application/json",
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -163,7 +165,7 @@ export default class Service {
                 "Content-Type": "application/json",
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -178,7 +180,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -191,7 +193,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -206,7 +208,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -220,7 +222,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -236,7 +238,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -249,7 +251,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     /**
@@ -264,7 +266,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
 
@@ -280,7 +282,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     removeUserFromProject(projectId, userId) {
@@ -289,7 +291,7 @@ export default class Service {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }
-        }).then(this.getJson.bind(this))
+        }).then(this.getJson.bind(this));
     }
 
     getJsonNoLoginRedirect(res) {
@@ -304,7 +306,7 @@ export default class Service {
         if (res.status === 401) {
             window.location.href = "/sign-in";
         }
-        return this.getJsonNoLoginRedirect(res)
+        return this.getJsonNoLoginRedirect(res);
     }
 
     getUserData() {

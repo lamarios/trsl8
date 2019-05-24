@@ -12,7 +12,7 @@ export default class MainPage extends React.Component {
 
     render() {
         return <Container>
-            <h1>Yo</h1>
+            <h1>helfdsfdsflo</h1>
         </Container>;
     }
 }
