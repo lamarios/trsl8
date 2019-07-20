@@ -9,7 +9,7 @@ WORKDIR /go/src/github.com/lamarios/trsl8
 
 ADD api ./
 ADD dao ./
-ADD fileHandler ./
+ADD fileHandlers ./
 ADD git ./
 ADD utils ./
 
