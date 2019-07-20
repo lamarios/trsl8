@@ -50,7 +50,14 @@ type StringResponse struct {
 
 var (
 	projectPushMap = make(map[uint]xid.ID)
+	jobChan        = make(chan func(), 1000)
 )
+
+func stringWorker(jobChan <-chan func()) {
+	for fn := range jobChan {
+		fn()
+	}
+}
 
 func GetProjectProgressHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 	project, err := GetProjectForUser(user, true, w, r)
@@ -364,21 +371,23 @@ func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = handler.UpdateString(project, updateString.Language, updateString.Term, updateString.Value)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't update file")
-		return
+	jobChan <- func() {
+		err = handler.UpdateString(project, updateString.Language, updateString.Term, updateString.Value)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't update file")
+			return
+		}
+
+		_, err := git.CommitChanges(project, "["+user.Email+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't commit changes")
+			return
+		}
+
+		go pushProject(project)
 	}
 
-	commitChanges, err := git.CommitChanges(project, "["+user.Email+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't commit changes")
-		return
-	}
-
-	go pushProject(project)
-
-	ToJson(commitChanges.String(), w)
+	ToJson("true", w)
 }
 
 func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {

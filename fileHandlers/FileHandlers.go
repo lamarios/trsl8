@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-type fileHandler interface {
+type FileHandler interface {
 	GetStrings(project dao.Project, language string) (map[string]string, error)
 	GetString(project dao.Project, language string, term string) (string, error)
 	GetTerms(project dao.Project) ([]string, error)
@@ -15,7 +15,7 @@ type fileHandler interface {
 	GetLanguages(project dao.Project) ([]string, error)
 }
 
-func GetHandler(fileType string) fileHandler {
+func GetHandler(fileType string) FileHandler {
 	switch fileType {
 	case "json":
 		return JsonHandler{}
