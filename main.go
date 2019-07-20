@@ -12,8 +12,10 @@ import (
 )
 
 func main() {
+	go api.StringWorker(api.JobChan)
 	dao.SetUp()
 	DefineRoutes()
+
 }
 
 func DefineRoutes() {

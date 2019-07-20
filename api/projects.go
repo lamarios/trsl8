@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -50,10 +49,10 @@ type StringResponse struct {
 
 var (
 	projectPushMap = make(map[uint]xid.ID)
-	jobChan        = make(chan func(), 1000)
+	JobChan        = make(chan func(), 1000)
 )
 
-func stringWorker(jobChan <-chan func()) {
+func StringWorker(jobChan <-chan func()) {
 	for fn := range jobChan {
 		fn()
 	}
@@ -162,19 +161,18 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 				count++
 			}
 		}
-		progress[language] = count * 100 / len(terms)
+		total := len(terms)
+		if total == 0 {
+			total = 1
+		}
+		progress[language] = count * 100 / total
 	}
 
 	// now getting based on each term
 	request.Filter = strings.ToUpper(request.Filter)
 	for _, term := range terms {
-		reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-		if err != nil {
-			log.Fatal(err)
-		}
 
-		tempTerm := reg.ReplaceAllString(term, " ")
-		tempTerm = strings.ToUpper(tempTerm)
+		tempTerm := strings.ToUpper(term)
 		if strings.Contains(tempTerm, request.Filter) {
 
 			termTrans := make(map[string]string)
@@ -318,6 +316,50 @@ func CreateProject(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// checking if main language is available, otherwise create it
+	availableFiles, err := git.GetRepoFiles(fmt.Sprint(project.ID))
+	if err != nil || availableFiles == nil {
+		availableFiles = make([]string, 0)
+	}
+
+	languageAvailable := false
+	for _, f := range availableFiles {
+
+		language := strings.TrimSuffix(f, filepath.Ext(f))
+
+		if language == project.MainLanguage {
+			languageAvailable = true
+		}
+	}
+
+	if !languageAvailable {
+		handler := fileHandlers.GetHandler(project.FileType)
+
+		newFileName, e := handler.CreateNewLanguage(project, project.MainLanguage)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		e = git.AddFile(project, newFileName)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		_, e = git.CommitChanges(project, "["+user.Email+"] add new language "+project.MainLanguage)
+		if e != nil {
+			WebError(w, e, 500, "Error when creating new file")
+			log.Print(e)
+			return
+		}
+
+		go pushProject(project)
+
+	}
+
 	ToJson(&project.ProjectLight, w)
 }
 
@@ -339,7 +381,7 @@ func TestProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 	}
 
 	availableFiles, err := git.GetRepoFiles(dir)
-	if err != nil {
+	if err != nil || availableFiles == nil {
 		availableFiles = make([]string, 0)
 	}
 
@@ -371,19 +413,20 @@ func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	jobChan <- func() {
+	JobChan <- func() {
 		err = handler.UpdateString(project, updateString.Language, updateString.Term, updateString.Value)
+		fmt.Print("string updated")
 		if err != nil {
 			WebError(w, err, 500, "Couldn't update file")
 			return
 		}
-
+		fmt.Print("before commit")
 		_, err := git.CommitChanges(project, "["+user.Email+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
 		if err != nil {
 			WebError(w, err, 500, "Couldn't commit changes")
 			return
 		}
-
+		fmt.Print("before push")
 		go pushProject(project)
 	}
 
@@ -490,7 +533,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 }
 
 func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
-	project, e := GetProjectForUser(user, false, w, r)
+	project, e := GetProjectForUser(user, true, w, r)
 	if e != nil {
 		WebError(w, e, 500, "Something went wrong when getting project")
 		log.Print(e)
@@ -521,17 +564,19 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	handler.UpdateString(project, project.MainLanguage, term, "")
+	JobChan <- func() {
+		handler.UpdateString(project, project.MainLanguage, term, "")
 
-	commitChanges, err := git.CommitChanges(project, "["+user.Email+"] update "+project.MainLanguage+": new term "+term)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't commit")
-		return
+		_, err := git.CommitChanges(project, "["+user.Email+"] update "+project.MainLanguage+": new term "+term)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't commit")
+			return
+		}
+
+		go pushProject(project)
 	}
 
-	go pushProject(project)
-
-	ToJson(commitChanges.String(), w)
+	ToJson("true", w)
 }
 
 func AddUserToProjectHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {

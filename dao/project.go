@@ -33,7 +33,7 @@ func GetAllProjects(user UserFull) []Project {
 
 	var projects []Project
 
-	db.Preload("Users").Preload("Owner").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("owner_id = ?", user.ID).Or("p.user_id = ?", user.ID).Find(&projects)
+	db.Select("DISTINCT(projects.id), projects.*").Preload("Users").Preload("Owner").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("owner_id = ?", user.ID).Or("p.user_id = ?", user.ID).Find(&projects)
 
 	return projects
 }

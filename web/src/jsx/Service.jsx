@@ -1,7 +1,7 @@
 import {sprintf} from "sprintf-js";
 
-const ROOT = process.env.API_ROOT;
-console.log('ROOT', process.env.API_ROOT);
+const ROOT = process.env.API_ROOT || '/';
+console.log('ROOT', ROOT);
 const ENDPOINTS = {
     USERS: {
         LOGIN: ROOT + "/login-submit"

@@ -3,15 +3,19 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/1" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/10" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/11" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/12" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/13" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/14" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/2" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/3" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/4" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/5" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/6" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/7" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/8" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/9" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test095526929" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test274495726" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test278240580" vcs="Git" />
@@ -36,12 +40,20 @@
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test967761971" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/translator-repo-test972216230" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test011584186" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test261765267" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test268546424" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test278813930" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test350679288" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test362938339" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test644438890" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test753512379" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test762366989" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test776166763" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test783217708" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test809196460" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test818348690" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test882595249" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test938798793" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/repos/tmp/trsl8-repo-test987163362" vcs="Git" />
   </component>
 </project>
