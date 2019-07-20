@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 VERSION=$1
-ARCH=$(go env GOARCH)
-OS=$(go env GOOS)
+#ARCH=$(go env GOARCH)
+#OS=$(go env GOOS)
+ARCH="amd64"
+OS="linux"
 
 echo "Building trsl8 $VERSION  os:$OS arch:$ARCH"
 
