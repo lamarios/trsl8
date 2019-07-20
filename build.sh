@@ -8,7 +8,7 @@ OS="linux"
 
 echo "Building trsl8 $VERSION  os:$OS arch:$ARCH"
 
-docker build --no-cache --tag gonzague/trsl8-build:${VERSION} -f docker/Dockerfile_build .
+docker build --no-cache --tag gonzague/trsl8-build -f docker/Dockerfile_build .
 if [ $? -ne 0 ]; then   exit 1; fi
 
 #Compressing
