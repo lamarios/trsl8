@@ -7,11 +7,11 @@ RUN  apt-get -y install golang-go go-dep git
 RUN mkdir -p /go/src/github.com/lamarios/trsl8
 WORKDIR /go/src/github.com/lamarios/trsl8
 
-ADD api ./
-ADD dao ./
-ADD fileHandlers ./
-ADD git ./
-ADD utils ./
+ADD api ./api
+ADD dao ./dao
+ADD fileHandlers ./fileHandlers
+ADD git ./git
+ADD utils ./utils
 
 ADD main.go ./
 ADD Gopkg.toml ./
