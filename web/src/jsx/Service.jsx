@@ -1,6 +1,6 @@
 import {sprintf} from "sprintf-js";
 
-const ROOT = process.env.API_ROOT || '/';
+const ROOT = process.env.API_ROOT || 'https://trsl8.com';
 console.log('ROOT', ROOT);
 const ENDPOINTS = {
     USERS: {
