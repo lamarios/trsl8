@@ -12,8 +12,14 @@ docker build --no-cache --tag gonzague/trsl8-build:latest --tag gonzague/trsl8-b
 if [ $? -ne 0 ]; then   exit 1; fi
 
 #Compressing
-docker run  gonzague/trsl8-build
+echo "Building app"
+docker stop trsl8-build
+docker rm trsl8-build
+docker run --name trsl8-build  gonzague/trsl8-build
 if [ $? -ne 0 ]; then   exit 1; fi
+
+docker cp trsl8-build:/go/src/github.com/lamarios/trsl8 ./trsl8
+ls
 #tar -czf trsl8-$VERSION-$OS-$ARCH.tar.gz trsl8
 
 echo "Building the Web"
