@@ -1,11 +1,21 @@
 FROM ubuntu:18.04
 
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && apt-get update
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf && apt-get -y install golang-go go-dep git
+RUN  apt-get update
+RUN  apt-get -y install golang-go go-dep git
+
 
 RUN mkdir -p /go/src/github.com/lamarios/trsl8
 WORKDIR /go/src/github.com/lamarios/trsl8
 
+ADD api ./
+ADD dao ./
+ADD fileHandler ./
+ADD git ./
+ADD utils ./
+
+ADD main.go ./
+ADD Gopkg.toml ./
+ADD Gopkg.lock ./
 
 ENV GOPATH /go
 CMD dep ensure && go build -o trsl8
