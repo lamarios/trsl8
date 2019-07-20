@@ -8,7 +8,7 @@ OS="linux"
 
 echo "Building trsl8 $VERSION  os:$OS arch:$ARCH"
 
-docker build --tag gonzague/trsl8-build:latest --tag gonzague/trsl8-build:${VERSION} -f docker/Dockerfile_build .
+docker build --no-cache --tag gonzague/trsl8-build:latest --tag gonzague/trsl8-build:${VERSION} -f docker/Dockerfile_build .
 if [ $? -ne 0 ]; then   exit 1; fi
 
 #Compressing
@@ -33,6 +33,6 @@ cp trsl8 docker/trsl8
 cp -R static docker/static
 
 cd docker
-docker build --tag gonzague/trsl8:latest --tag gonzague/trsl8:${VERSION} .
+docker build --no-cache --tag gonzague/trsl8:latest --tag gonzague/trsl8:${VERSION} .
 if [ $? -ne 0 ]; then   exit 1; fi
 cd -
