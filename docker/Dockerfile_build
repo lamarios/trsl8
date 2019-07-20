@@ -17,5 +17,7 @@ ADD main.go ./
 ADD Gopkg.toml ./
 ADD Gopkg.lock ./
 
+RUN ls /go/src/github.com/lamarios/trsl8
+
 ENV GOPATH /go
 CMD dep ensure && go build -o trsl8
