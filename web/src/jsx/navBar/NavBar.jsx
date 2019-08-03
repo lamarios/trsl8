@@ -5,6 +5,8 @@ import SignUpSignIgn from "./SignUpSignIgn";
 import {NavLink} from "react-router-dom";
 import {fadeInTop} from "../animations";
 
+import {service} from "../Service";
+
 const Container = styled.div`
 display: flex;
 align-items: center;
@@ -28,10 +30,15 @@ color: ${props => props.theme.colors.text.main};
 `;
 
 export default class NavBar extends React.Component {
+    constructor(props) {
+        super(props);
+
+    }
 
 
     render() {
         const token = window.localStorage.getItem("token");
+        const loggedIn = token !== null && !service.tokenExpired(token);
         return <Container>
             <Left>
                 <Link to={"/"}>
@@ -39,11 +46,11 @@ export default class NavBar extends React.Component {
                 </Link>
             </Left>
             <Center>
-                {token !== null && <Link to={"/projects"}>Projects</Link>}
+                {loggedIn && <Link to={"/projects"}>Projects</Link>}
             </Center>
             <Right>
-                {token !== null && <Me/>}
-                {token === null && <SignUpSignIgn/>}
+                {loggedIn && <Me/>}
+                {!loggedIn && <SignUpSignIgn/>}
             </Right>
         </Container>;
     }

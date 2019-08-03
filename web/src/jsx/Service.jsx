@@ -1,7 +1,7 @@
 import {sprintf} from "sprintf-js";
 
-const ROOT = process.env.API_ROOT || 'https://trsl8.com';
-console.log('ROOT', ROOT);
+const ROOT = process.env.API_ROOT || "https://trsl8.com";
+console.log("ROOT", ROOT);
 const ENDPOINTS = {
     USERS: {
         LOGIN: ROOT + "/login-submit"
@@ -77,11 +77,21 @@ export default class Service {
     }
 
     checkLocalStorage() {
-        if (window.localStorage.getItem("token") === null) {
+        let token = window.localStorage.getItem("token");
+        if (token === null || this.tokenExpired(token)) {
+            window.localStorage.removeItem("token");
             window.location.href = "/login";
         }
 
-        return window.localStorage.getItem("token");
+
+        return token;
+    }
+
+    tokenExpired(jwtToken) {
+        var tokenPayload = this.parseJwt(jwtToken);
+        var now = Math.floor(Date.now() / 1000);
+
+        return tokenPayload.exp < now;
     }
 
     /**
@@ -315,6 +325,16 @@ export default class Service {
         const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
         return JSON.parse(window.atob(base64)).Data.User;
     }
+
+    parseJwt(token) {
+        var base64Url = token.split(".")[1];
+        var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        var jsonPayload = decodeURIComponent(atob(base64).split("").map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(""));
+
+        return JSON.parse(jsonPayload);
+    };
 }
 
 export const service = new Service();

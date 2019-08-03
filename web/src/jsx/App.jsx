@@ -11,6 +11,7 @@ import MainPage from "./mainPage/MainPage";
 import NavBar from "./navBar/NavBar";
 
 
+
 const GlobalStyle = createGlobalStyle`
   body {
     color: ${props => props.theme.colors.text.main};

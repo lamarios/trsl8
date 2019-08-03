@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/lamarios/trsl8/api"
@@ -37,6 +38,8 @@ func DefineRoutes() {
 		AllowCredentials: true,
 		Debug:            true,
 	})
+
+	fmt.Println("Server ready on port 8000")
 
 	log.Fatal(http.ListenAndServe(":"+utils.GetEnv("PORT", "8000"), c.Handler(r)))
 }
