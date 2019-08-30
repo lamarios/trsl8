@@ -10,6 +10,7 @@ import {faPlus} from "@fortawesome/free-solid-svg-icons";
 import NewLanguageDialog from "./NewLanguageDialog";
 import ProjectUsers from "./ProjectUsers";
 import StringCell from "./StringCell";
+import TermCell from './TermCell';
 import LanguageSelector from "./LanguageSelector";
 import ProjectFilter from "./ProjectFilter";
 import CreateNewTerm from "./CreateNewTerm";
@@ -39,7 +40,7 @@ const TranslationContainer = styled.table`
             border-bottom: 1px solid ${props => props.theme.colors.text.light};
         }
     }
-    
+
     tr, td{
         height: 36px;
     }
@@ -325,7 +326,7 @@ export default class Project extends React.Component {
                             })}
                         </LanguageProgressRow>}
                         {terms.map((t, index) => <tr key={t}>
-                            <td>{t}</td>
+                            <td><TermCell term={t} /></td>
                             {languages.map((l) => {
                                     return <StringCell key={l}
                                                        value={translations[l] !== undefined
