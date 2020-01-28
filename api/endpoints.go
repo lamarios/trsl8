@@ -62,7 +62,8 @@ func ToJson(obj interface{}, w http.ResponseWriter) (string, error) {
 	}
 
 	w.Header().Add("Content-type", "application/json")
-	fmt.Fprintf(w, string(b))
+	//fmt.Fprintf(w, string(b))
+	w.Write([]byte(string(b)))
 	return string(b), nil
 }
 
