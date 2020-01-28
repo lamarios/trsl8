@@ -108,7 +108,7 @@ func ServeIndexHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		WebError(w, err, 500, "")
 	} else {
-		fmt.Fprint(w, string(dat))
+		w.Write([]byte(string(dat)))
 	}
 }
 
@@ -121,6 +121,6 @@ func ServeStaticHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		WebError(w, err, 500, "")
 	} else {
-		fmt.Fprint(w, string(dat))
+		w.Write([]byte(string(dat)))
 	}
 }
