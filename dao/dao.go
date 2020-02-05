@@ -14,6 +14,7 @@ type DB struct {
 	DatabaseName string
 	Username     string
 	Password     string
+	Options      string
 }
 
 var config = DB{
@@ -22,6 +23,7 @@ var config = DB{
 	DatabaseName: utils.GetEnv("DB_NAME", ""),
 	Username:     utils.GetEnv("DB_USERNAME", ""),
 	Password:     utils.GetEnv("DB_PASSWORD", ""),
+	Options:      utils.GetEnv("DB_OPTIONS", "?charset=utf8&parseTime=True&loc=Local"),
 }
 
 func SetUp() {
@@ -41,7 +43,7 @@ func GetConnection() *gorm.DB {
 	case "sqlite3":
 		arguments = config.Url
 	case "mysql":
-		arguments = config.Username + ":" + config.Password + "@tcp(" + config.Url + ")/" + config.DatabaseName + "?charset=utf8&parseTime=True&loc=Local"
+		arguments = config.Username + ":" + config.Password + "@tcp(" + config.Url + ")/" + config.DatabaseName + config.Options
 	}
 
 	db, err := gorm.Open(config.Type, arguments)
