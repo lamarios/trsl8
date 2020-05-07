@@ -30,31 +30,24 @@ func (User) TableName() string {
 
 // Gets all the users
 func GetAllUsers() []UserFull {
-	db := GetConnection()
-	defer db.Close()
 
 	var users []UserFull
-	db.Find(&users)
+	DB.Find(&users)
 
 	return users
 }
 
 func CreateUser(user UserFull) (UserFull, error) {
 
-	db := GetConnection()
-	defer db.Close()
-
-	db.Create(&user)
+	DB.Create(&user)
 
 	return user, nil
 }
 
 func GetUserByEmail(email string) (UserFull, error) {
-	db := GetConnection()
-	defer db.Close()
 
 	var user UserFull
-	db.First(&user, "email = ?", email)
+	DB.First(&user, "email = ?", email)
 
 	if user != (UserFull{}) {
 		return user, nil
@@ -64,11 +57,9 @@ func GetUserByEmail(email string) (UserFull, error) {
 }
 
 func GetUserById(id uint) (UserFull, error) {
-	db := GetConnection()
-	defer db.Close()
 
 	var user UserFull
-	db.First(&user, "id = ?", id)
+	DB.First(&user, "id = ?", id)
 	if user != (UserFull{}) {
 		return user, nil
 	} else {
@@ -77,12 +68,10 @@ func GetUserById(id uint) (UserFull, error) {
 }
 
 func SearchUser(search string) []User {
-	db := GetConnection()
-	defer db.Close()
 
 	search = "%" + search + "%"
 	var users []User
-	db.Where("first_name LIKE ? OR last_name LIKE ? OR email LIKE ?", search, search, search).Find(&users)
+	DB.Where("first_name LIKE ? OR last_name LIKE ? OR email LIKE ?", search, search, search).Find(&users)
 
 	return users
 }

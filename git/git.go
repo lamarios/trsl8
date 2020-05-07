@@ -22,6 +22,8 @@ const (
 	CloneRoot = "./repos"
 )
 
+var RefreshProjects = true
+
 func acceptAllHosts(hostname string, remote net.Addr, key ssh.PublicKey) error {
 	return nil
 }
@@ -241,4 +243,29 @@ func Push(project dao.Project) error {
 	}
 
 	return err
+}
+
+func StopProjectRefresh() {
+	RefreshProjects = false
+}
+
+func PullPushAllProjectsLoop() {
+	for RefreshProjects {
+		projects := dao.GetAllProjectsAvailable()
+
+		for _, project := range projects {
+			log.Printf("updating project %d", project.ID)
+			err := Pull(project)
+			if err != nil {
+				log.Printf("Error while pulling project %d", project.ID)
+			}
+			err = Push(project)
+			if err != nil {
+				log.Printf("Error while pushing project %d", project.ID)
+			}
+		}
+
+		time.Sleep(1 * time.Minute)
+
+	}
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/gorilla/mux"
 	"github.com/lamarios/trsl8/dao"
 	"io"
@@ -117,6 +118,10 @@ func ServeStaticHandler(w http.ResponseWriter, r *http.Request) {
 	path := vars["path"]
 
 	dat, err := ioutil.ReadFile("static/" + path)
+	detect, _ := mimetype.DetectFile("static/" + path)
+
+	w.Header().Add("Content-Type", detect.String())
+
 	if err != nil {
 		WebError(w, err, 500, "")
 	} else {

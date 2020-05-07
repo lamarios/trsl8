@@ -6,6 +6,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/lamarios/trsl8/api"
 	"github.com/lamarios/trsl8/dao"
+	"github.com/lamarios/trsl8/git"
 	"github.com/lamarios/trsl8/utils"
 	"github.com/rs/cors"
 	"log"
@@ -23,6 +24,11 @@ func DefineRoutes() {
 	r := mux.NewRouter()
 	api.DefineEndPoints(r)
 
+	dao.DB = dao.GetConnection()
+	defer dao.DB.Close()
+
+	go git.PullPushAllProjectsLoop()
+	defer git.StopProjectRefresh()
 	//var dir string
 	//dir = "./static"
 

@@ -27,44 +27,43 @@ type ProjectUser struct {
 	User      User `gorm:"foreignkey:UserId"`
 }
 
+func GetAllProjectsAvailable() []Project {
+	var projects []Project
+	DB.Model(&Project{}).Find(&projects)
+
+	return projects
+}
+
 func GetAllProjects(user UserFull) []Project {
-	db := GetConnection()
-	defer db.Close()
 
 	var projects []Project
 
-	db.Select("DISTINCT(projects.id), projects.*").Preload("Users").Preload("Owner").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("owner_id = ?", user.ID).Or("p.user_id = ?", user.ID).Find(&projects)
+	DB.Select("DISTINCT(projects.id), projects.*").Preload("Users").Preload("Owner").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("owner_id = ?", user.ID).Or("p.user_id = ?", user.ID).Find(&projects)
 
 	return projects
 }
 
 func GetProject(user UserFull, id uint) (Project, error) {
-	db := GetConnection()
-	defer db.Close()
 
 	var project Project
 
-	db.Preload("Owner").Preload("Users").Preload("Users.User").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("(owner_id = ? OR p.user_id = ?) AND projects.id = ?", user.ID, user.ID, id).First(&project)
+	DB.Preload("Owner").Preload("Users").Preload("Users.User").Joins("LEFT JOIN project_users p ON projects.id = p.project_id").Where("(owner_id = ? OR p.user_id = ?) AND projects.id = ?", user.ID, user.ID, id).First(&project)
 
 	return project, nil
 }
 
 func GetProjectById(id uint) (Project, error) {
-	db := GetConnection()
-	defer db.Close()
 
 	var project Project
 
-	db.Preload("Owner").Preload("Users").Preload("Users.User").First(&project)
+	DB.Preload("Owner").Preload("Users").Preload("Users.User").First(&project)
 
 	return project, nil
 }
 
 func CreateProject(project *Project) *Project {
-	db := GetConnection()
-	defer db.Close()
 
-	db.Create(&project)
+	DB.Create(&project)
 
 	return project
 }
@@ -76,10 +75,7 @@ func AddUserToProject(project Project, user UserFull) (Project, error) {
 	projectUser.User = user.User
 	projectUser.ProjectId = project.ID
 
-	db := GetConnection()
-	defer db.Close()
-
-	db.Create(&projectUser)
+	DB.Create(&projectUser)
 
 	return GetProjectById(project.ID)
 }
@@ -88,12 +84,9 @@ func RemoveUserFromProject(project Project, user UserFull) (Project, error) {
 
 	projectUser := ProjectUser{}
 
-	db := GetConnection()
-	defer db.Close()
+	DB.Where("user_id = ? AND project_id = ?", user.ID, project.ID).First(&projectUser)
 
-	db.Where("user_id = ? AND project_id = ?", user.ID, project.ID).First(&projectUser)
-
-	db.Unscoped().Delete(&projectUser)
+	DB.Unscoped().Delete(&projectUser)
 
 	return GetProjectById(project.ID)
 }

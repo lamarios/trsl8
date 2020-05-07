@@ -8,7 +8,7 @@ import (
 	"github.com/lamarios/trsl8/utils"
 )
 
-type DB struct {
+type DBConfig struct {
 	Type         string
 	Url          string
 	DatabaseName string
@@ -17,7 +17,7 @@ type DB struct {
 	Options      string
 }
 
-var config = DB{
+var config = DBConfig{
 	Type:         utils.GetEnv("DB_TYPE", "sqlite3"),
 	Url:          utils.GetEnv("DB_URL", "trsl8.db"),
 	DatabaseName: utils.GetEnv("DB_NAME", ""),
@@ -25,6 +25,8 @@ var config = DB{
 	Password:     utils.GetEnv("DB_PASSWORD", ""),
 	Options:      utils.GetEnv("DB_OPTIONS", "?charset=utf8&parseTime=True&loc=Local"),
 }
+
+var DB *gorm.DB
 
 func SetUp() {
 	db := GetConnection()

@@ -65,12 +65,12 @@ func GetProjectProgressHandler(user dao.UserFull, w http.ResponseWriter, r *http
 		return
 	}
 
-	err = git.Pull(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't pull lastest changes")
-		return
-	}
-
+	/*	err = git.Pull(project)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't pull lastest changes")
+			return
+		}
+	*/
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	terms, err := handler.GetTerms(project)
@@ -122,12 +122,12 @@ func GetProjectStringsHandler(user dao.UserFull, w http.ResponseWriter, r *http.
 	var request StringRequest
 	FromJson(r.Body, &request)
 
-	err = git.Pull(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't pull lastest changes")
-		return
-	}
-
+	/*	err = git.Pull(project)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't pull lastest changes")
+			return
+		}
+	*/
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	terms, err := handler.GetTerms(project)
@@ -407,27 +407,27 @@ func UpdateStringHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reque
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	// we pull changes before committing to be sure we have everything up to date, trying to avoid conflicts as much as possible
-	err = git.Pull(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't pull")
-		return
-	}
-
+	/*	err = git.Pull(project)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't pull")
+			return
+		}
+	*/
 	JobChan <- func() {
 		err = handler.UpdateString(project, updateString.Language, updateString.Term, updateString.Value)
-		fmt.Print("string updated")
+		fmt.Println("string updated")
 		if err != nil {
 			WebError(w, err, 500, "Couldn't update file")
 			return
 		}
-		fmt.Print("before commit")
+		fmt.Println("before commit")
 		_, err := git.CommitChanges(project, "["+user.Email+"] update "+updateString.Language+": "+updateString.Term+" -> "+updateString.Value)
 		if err != nil {
 			WebError(w, err, 500, "Couldn't commit changes")
 			return
 		}
-		fmt.Print("before push")
-		go pushProject(project)
+		fmt.Println("before push")
+		//go pushProject(project)
 	}
 
 	ToJson("true", w)
@@ -440,12 +440,12 @@ func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err := git.Pull(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't pull")
-		return
-	}
-
+	/*	err := git.Pull(project)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't pull")
+			return
+		}
+	*/
 	handler := fileHandlers.GetHandler(project.FileType)
 	terms, e := handler.GetTerms(project)
 	if e != nil {
@@ -527,7 +527,7 @@ func NewLanguageHandler(user dao.UserFull, w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	go pushProject(project)
+	//go pushProject(project)
 
 	ToJson(commit.String(), w)
 }
@@ -545,19 +545,19 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 
 	// we pull changes before committing to be sure we have everything up to date, trying to avoid conflicts as much as possible
 	// we pull changes before committing to be sure we have everything up to date, trying to avoid conflicts as much as possible
-	err := git.Pull(project)
-	if err != nil {
-		WebError(w, err, 500, "Couldn't commit")
-		return
-	}
-
+	/*	err := git.Pull(project)
+		if err != nil {
+			WebError(w, err, 500, "Couldn't commit")
+			return
+		}
+	*/
 	var updateString UpdateString
 	FromJson(r.Body, &updateString)
 
 	handler := fileHandlers.GetHandler(project.FileType)
 
 	// checking if term already exists
-	_, err = handler.GetString(project, project.MainLanguage, term)
+	_, err := handler.GetString(project, project.MainLanguage, term)
 	if err == nil {
 		error := errors.New("Term already exists")
 		WebError(w, error, 500, "")
@@ -573,7 +573,7 @@ func NewTermHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		go pushProject(project)
+		//go pushProject(project)
 	}
 
 	ToJson("true", w)

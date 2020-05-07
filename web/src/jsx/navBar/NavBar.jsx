@@ -1,4 +1,4 @@
-import React from "react";
+import React, {Fragment} from "react";
 import styled from "styled-components";
 import Me from "./Me";
 import SignUpSignIgn from "./SignUpSignIgn";
@@ -39,19 +39,25 @@ export default class NavBar extends React.Component {
     render() {
         const token = window.localStorage.getItem("token");
         const loggedIn = token !== null && !service.tokenExpired(token);
-        return <Container>
-            <Left>
-                <Link to={"/"}>
-                TRSL8
-                </Link>
-            </Left>
-            <Center>
-                {loggedIn && <Link to={"/projects"}>Projects</Link>}
-            </Center>
-            <Right>
-                {loggedIn && <Me/>}
-                {!loggedIn && <SignUpSignIgn/>}
-            </Right>
-        </Container>;
+        if (loggedIn) {
+
+            return <Container>
+                <Left>
+                    <Link to={"/"}>
+                        TRSL8
+                    </Link>
+                </Left>
+                <Center>
+                    {loggedIn && <Link to={"/projects"}>Projects</Link>}
+                </Center>
+                <Right>
+                    {loggedIn && <Me/>}
+                    {!loggedIn && <SignUpSignIgn/>}
+                </Right>
+            </Container>;
+        }else{
+            return <Fragment />;
+        }
+
     }
 }
