@@ -37,27 +37,38 @@ export default class NavBar extends React.Component {
 
 
     render() {
-        const token = window.localStorage.getItem("token");
-        const loggedIn = token !== null && !service.tokenExpired(token);
-        if (loggedIn) {
 
+        if (!this.props.titleOnly) {
+
+            const token = window.localStorage.getItem("token");
+            const loggedIn = token !== null && !service.tokenExpired(token);
+            if (loggedIn) {
+
+                return <Container>
+                    <Left>
+                        <Link to={"/"}>
+                            TRSL8
+                        </Link>
+                    </Left>
+                    <Center>
+                        {loggedIn && <Link to={"/projects"}>Projects</Link>}
+                    </Center>
+                    <Right>
+                        {loggedIn && <Me/>}
+                        {!loggedIn && <SignUpSignIgn/>}
+                    </Right>
+                </Container>;
+            } else {
+                return <Fragment/>;
+            }
+        } else {
             return <Container>
                 <Left>
                     <Link to={"/"}>
                         TRSL8
                     </Link>
                 </Left>
-                <Center>
-                    {loggedIn && <Link to={"/projects"}>Projects</Link>}
-                </Center>
-                <Right>
-                    {loggedIn && <Me/>}
-                    {!loggedIn && <SignUpSignIgn/>}
-                </Right>
             </Container>;
-        }else{
-            return <Fragment />;
         }
-
     }
 }
