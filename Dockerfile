@@ -2,6 +2,8 @@ FROM node AS build-web
 ADD ./web /src
 WORKDIR /src
 RUN cd src
+RUN rm -Rf .cache
+RUN rm -Rf node_modules
 RUN npm install
 RUN npm run build
 
