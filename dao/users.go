@@ -44,6 +44,11 @@ func CreateUser(user UserFull) (UserFull, error) {
 	return user, nil
 }
 
+func UpdateUser(user UserFull) error {
+	err := DB.Save(&user).Error
+	return err
+}
+
 func GetUserByEmail(email string) (UserFull, error) {
 
 	var user UserFull

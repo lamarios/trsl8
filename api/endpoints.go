@@ -17,11 +17,13 @@ func DefineEndPoints(r *mux.Router) {
 	r.HandleFunc("/sign-up", ServeIndexHandler)
 	r.HandleFunc("/projects/{id}", ServeIndexHandler)
 	r.HandleFunc("/projects", ServeIndexHandler)
+	r.HandleFunc("/profile", ServeIndexHandler)
 	r.HandleFunc("/static/{path}", ServeStaticHandler)
 
 	r.HandleFunc("/login-submit", Login).Methods("POST")
 
 	r.HandleFunc("/api/users", SignUp).Methods("POST")
+	r.HandleFunc("/api/users/{id}", CheckAuth(UpdateUser)).Methods("POST")
 	r.HandleFunc("/api/users/self", CheckAuth(GetSelfHandler)).Methods("GET")
 	r.HandleFunc("/api/users/search", CheckAuth(SearchUserHandler)).Methods("POST")
 
@@ -39,6 +41,7 @@ func DefineEndPoints(r *mux.Router) {
 	r.HandleFunc("/api/projects/{project}/strings/all", CheckAuth(GetProjectStringsHandler)).Methods("POST")
 	r.HandleFunc("/api/projects/{project}/strings", CheckAuth(UpdateStringHandler)).Methods("POST")
 	r.HandleFunc("/api/projects/{project}/status", CheckAuth(GetProjectStatusHandler)).Methods("GET")
+	r.HandleFunc("/api/projects/{project}/history", CheckAuth(GetProjectHistory)).Methods("GET")
 	r.HandleFunc("/api/projects/{project}/users/{user}", CheckAuth(AddUserToProjectHandler)).Methods("POST")
 	r.HandleFunc("/api/projects/{project}/users/{user}", CheckAuth(RemoveUserFromProjectHandler)).Methods("DELETE")
 }

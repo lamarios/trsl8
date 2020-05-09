@@ -9,6 +9,7 @@ import Login from "./Login";
 import Project from "./projects/Project";
 import MainPage from "./mainPage/MainPage";
 import NavBar from "./navBar/NavBar";
+import Profile from "./Profile";
 
 
 
@@ -42,6 +43,7 @@ export default class App extends React.Component {
                 <AppContainer>
                     <Route exact path="/" component={MainPage}/>
                     <Route exact path="/projects" component={Projects}/>
+                    <Route exact path="/profile" component={Profile}/>
                     <Route exact path="/sign-up" component={SignUp}/>
                     <Route exact path="/sign-in" component={Login}/>
                     <Route exact path="/projects/:id" component={Project}/>

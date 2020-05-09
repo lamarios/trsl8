@@ -18,6 +18,14 @@ import (
 	"time"
 )
 
+type Commit struct {
+	Type    string `json:"type"`
+	Date    string `json:"date"`
+	Author  string `json:"author"`
+	Message string `json:"message"`
+	Commit  string `json:"commit"`
+}
+
 const (
 	CloneRoot = "./repos"
 )
@@ -268,4 +276,44 @@ func PullPushAllProjectsLoop() {
 		time.Sleep(1 * time.Minute)
 
 	}
+}
+
+func GetRepoHistory(project dao.Project) ([]Commit, error) {
+	r, err := git.PlainOpen(GetRepoRoot(project))
+	if err != nil {
+		return nil, err
+	}
+
+	ref, err := r.Head()
+	if err != nil {
+		return nil, err
+	}
+
+	// ... retrieves the commit history
+	cIter, err := r.Log(&git.LogOptions{From: ref.Hash(), All: true})
+	if err != nil {
+		return nil, err
+	}
+
+	commits := make([]Commit, 10)
+	// ... just iterates over the commits, printing it
+	err = cIter.ForEach(func(c *object.Commit) error {
+		fmt.Println(c)
+		commit := Commit{
+			Type:    plumbing.CommitObject.String(),
+			Commit:  c.Hash.String(),
+			Author:  c.Author.String(),
+			Date:    c.Author.When.Format("Mon Jan 02 15:04:05 2006 -0700"),
+			Message: c.Message,
+		}
+		commits = append(commits, commit)
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return commits, nil
+
 }

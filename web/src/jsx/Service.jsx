@@ -9,6 +9,7 @@ const ENDPOINTS = {
     API: {
         USERS: {
             SIGN_UP: ROOT + "/api/users",
+            UPDATE: ROOT + "/api/users/",
             SEARCH: ROOT + "/api/users/search",
             SELF: ROOT + "/api/users/self",
         },
@@ -23,6 +24,7 @@ const ENDPOINTS = {
             GET_TERM: ROOT + "/api/projects/%s/terms",
             CREATE_LANGUAGE: ROOT + "/api/projects/{id}/languages",
             GET_LANGUAGES: ROOT + "/api/projects/%s/languages",
+            GET_HISTORY: ROOT + "/api/projects/%s/history",
             USERS: {
                 ADD: ROOT + "/api/projects/{id}/users/{userId}",
             }
@@ -207,6 +209,19 @@ export default class Service {
     }
 
     /**
+     * Gets the project commit list
+     * @param id
+     * @returns {Promise<Response>}
+     */
+    getProjectHistory(id) {
+        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_HISTORY, id), {
+            headers: {
+                "Authorization": this.checkLocalStorage()
+            }
+        }).then(this.getJson.bind(this));
+    }
+
+    /**
      * Creates a new term
      * @param id
      * @return {Promise<Response | never>}
@@ -279,6 +294,20 @@ export default class Service {
         }).then(this.getJson.bind(this));
     }
 
+    /**
+     * Updates a user
+     * @param user
+     * @returns {Promise<Response>}
+     */
+    updateUser(user) {
+        return fetch(ENDPOINTS.API.USERS.UPDATE + user.ID, {
+            method: "POST", // or "PUT"
+            body: JSON.stringify(user),
+            headers: {
+                "Authorization": this.checkLocalStorage()
+            }
+        }).then(res => res.text());
+    }
 
     /**
      * Adds a user to a project

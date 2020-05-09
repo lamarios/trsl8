@@ -2,10 +2,13 @@ package api
 
 import (
 	"errors"
+	"github.com/gorilla/mux"
 	"github.com/lamarios/trsl8/dao"
 	"github.com/lamarios/trsl8/utils"
 	"log"
 	"net/http"
+	"strconv"
+	"strings"
 )
 
 type LoginForm struct {
@@ -54,6 +57,61 @@ func SignUp(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+func UpdateUser(currentUser dao.UserFull, w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	//getting project to see if user can access
+	userId, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		WebError(w, err, 500, "Couldn't parse user id")
+		return
+	}
+
+	user, err := dao.GetUserById(uint(userId))
+
+	if err != nil {
+		WebError(w, err, 404, "Couldn't get user")
+		return
+	}
+
+	if user.ID != currentUser.ID && currentUser.Role != dao.ADMIN {
+		WebError(w, err, 401, "Cannot edit another user if not admin")
+		return
+	}
+
+	var userUpdated dao.UserFull
+	FromJson(r.Body, &userUpdated)
+
+	userUpdated.FirstName = strings.TrimSpace(userUpdated.FirstName)
+	userUpdated.LastName = strings.TrimSpace(userUpdated.LastName)
+
+	if len(userUpdated.FirstName) == 0 || len(userUpdated.LastName) == 0 {
+		WebError(w, err, 400, "First name or last name can't be empty")
+		return
+	}
+
+	user.FirstName = userUpdated.FirstName
+	user.LastName = userUpdated.LastName
+	if len(userUpdated.Password) > 0 {
+		user.Password = utils.Hash(userUpdated.Password)
+	}
+
+	err = dao.UpdateUser(user)
+	if err != nil {
+		WebError(w, err, 500, "Error while updating user")
+		return
+	}
+	// recreating token with updated data
+	encode, err := Encode(&user)
+	if err != nil {
+		WebError(w, err, 500, "Error while updating user")
+		return
+	}
+
+	w.Write([]byte(encode))
 }
 
 func GetSelfHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) {

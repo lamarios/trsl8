@@ -6,7 +6,7 @@ import Pagination from "../basic/Pagination";
 import PrimaryButton from "../basic/PrimaryButton";
 import OkDialog from "../basic/OkDialog";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus} from "@fortawesome/free-solid-svg-icons";
+import {faPlus, faHistory} from "@fortawesome/free-solid-svg-icons";
 import NewLanguageDialog from "./NewLanguageDialog";
 import ProjectUsers from "./ProjectUsers";
 import StringCell from "./StringCell";
@@ -15,6 +15,8 @@ import ProjectFilter from "./ProjectFilter";
 import CreateNewTerm from "./CreateNewTerm";
 import ProgressBar from "../basic/ProgressBar";
 import {fadeInLeft} from "../animations";
+import HistoryDialog from "./HistoryDialog";
+import Table from "../basic/Table";
 
 
 const TitleBar = styled.div`
@@ -22,24 +24,28 @@ const TitleBar = styled.div`
   align-items: center;
 `;
 
+const Actions = styled.div`
+display: flex;
+align-items: center;
+justify-content: flex-end;
+`;
+
+const ActionIcon = styled(FontAwesomeIcon)`
+display: block;
+cursor: pointer;
+margin: 0 10px;
+color: ${props => props.theme.colors.primary.main};
+transition: color 0.25s ease-in-out;
+&:hover{
+  color: ${props => props.theme.colors.primary.lightest};
+}
+`;
+
 const ProjectTitle = styled(Title)`
 flex-grow: 1;
 `;
 
-const TranslationContainer = styled.table`
-    unset:all;
-    border-spacing: 0 0;
-    border-collapse: collapse;
-    min-width: 100%;
-    border:none;
-
-    thead{
-        tr > th {
-            text-align: left;
-            border-bottom: 1px solid ${props => props.theme.colors.text.light};
-        }
-    }
-    
+const TranslationContainer = styled(Table)`
     tr, td{
         height: 36px;
     }
@@ -96,6 +102,7 @@ export default class Project extends React.Component {
             showNewLanguageDialog: false,
             loadingStrings: true,
             filterTimeout: undefined,
+            showHistoryDialog: false,
         };
         this.service = new Service();
         this.getProject = this.getProject.bind(this);
@@ -285,6 +292,9 @@ export default class Project extends React.Component {
                         <ProjectTitle>
                             {this.state.project.Name}
                         </ProjectTitle>
+                        <Actions>
+                            <ActionIcon onClick={() => this.setState({showHistoryDialog: true})} icon={faHistory}/>
+                        </Actions>
                         <NewLanguageButton onClick={() => this.setState({showNewLanguageDialog: true})}>
                             <FontAwesomeIcon icon={faPlus}/>
                             &nbsp;New language
@@ -344,7 +354,11 @@ export default class Project extends React.Component {
                                 </AddLanguageColumnButton>
                             </td>}
                         </tr>)}
-
+                        <tr>
+                            <td>
+                                <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
+                            </td>
+                        </tr>
                         <tr>
                             <td colSpan={languages.length + 1}>
                             </td>
@@ -356,7 +370,6 @@ export default class Project extends React.Component {
                                 itemCount={this.state.total} pageSize={this.state.pageSize}/>
                 </TableContainer>
                 }
-                <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
             </div>}
 
             {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
@@ -366,6 +379,10 @@ export default class Project extends React.Component {
             <NewLanguageDialog dismiss={() => this.setState({showNewLanguageDialog: false})}
                                addLanguage={this.addLanguage}
                                existingLanguages={this.state.languages}/>}
+            {this.state.showHistoryDialog && <HistoryDialog
+                dismiss={() => this.setState({showHistoryDialog: false})}
+                projectId={this.props.match.params.id}
+            />}
         </div>);
     }
 

@@ -457,6 +457,7 @@ func GetTermsHandler(user dao.UserFull, w http.ResponseWriter, r *http.Request) 
 	ToJson(terms, w)
 
 }
+
 func GetProjectForUser(user dao.UserFull, allowContributor bool, w http.ResponseWriter, r *http.Request) (dao.Project, error) {
 	vars := mux.Vars(r)
 
@@ -659,4 +660,21 @@ func pushProject(project dao.Project) {
 	} else {
 		log.Print("Project ", project.ID, ": Another push is coming later, skipping")
 	}
+}
+
+func GetProjectHistory(user dao.UserFull, w http.ResponseWriter, r *http.Request) {
+	project, err := GetProjectForUser(user, false, w, r)
+	if err != nil {
+		WebError(w, err, 500, "")
+		return
+	}
+
+	history, err := git.GetRepoHistory(project)
+	if err != nil {
+		WebError(w, err, 500, "")
+		return
+	}
+
+	ToJson(history, w)
+
 }

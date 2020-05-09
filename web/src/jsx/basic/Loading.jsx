@@ -1,7 +1,7 @@
-import React from 'react';
-import styled, {keyframes} from 'styled-components';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCloud } from '@fortawesome/free-solid-svg-icons'
+import React from "react";
+import styled, {keyframes} from "styled-components";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faCloud} from "@fortawesome/free-solid-svg-icons";
 
 
 const Fading = keyframes`
@@ -30,18 +30,11 @@ const Fading = keyframes`
 `;
 
 const Icon = styled(FontAwesomeIcon)`
-padding:5px;
-    color: ${props => props.theme.colors.primary.dark};
+    padding:5px;
+    color: ${props => props.color || props.theme.colors.primary.dark};
     animation: ${Fading} ease 1.5s  infinite;
 `;
 
-export default class Loading extends React.Component {
-    constructor(props) {
-        super(props);
+const Loading  = (props) => <Icon icon={faCloud}/>;
 
-    }
-
-    render() {
-        return ( <Icon icon={faCloud}/>)
-    }
-}
+export default Loading;

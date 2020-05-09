@@ -10,7 +10,8 @@ export const theme = {
         text: {
             main: "#444",
             light: "#999",
-            title: "#333"
+            title: "#333",
+            error: "#AA0000"
         },
         inputBorder: "#aaa",
         background: "white",

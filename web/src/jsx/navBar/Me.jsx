@@ -1,9 +1,10 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
 import Service from "../Service";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faUser} from "@fortawesome/free-solid-svg-icons";
+import {faUser, faPen, faSignOutAlt} from "@fortawesome/free-solid-svg-icons";
 import Dropdown from "../basic/Dropdown";
+import {NavLink} from "react-router-dom";
 
 const Container = styled.div`
   display: flex;
@@ -28,7 +29,25 @@ const UserName = styled.div``;
 
 const UserDropdown = styled(Dropdown)``;
 
-const MenuItem = styled.div``;
+const MenuItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const MenuLink = styled(NavLink)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: ${props => props.theme.colors.text.main};
+  text-decoration: none;
+  &:hover {
+  text-decoration: none;
+  }
+`;
+
+const Icon = styled(FontAwesomeIcon)`
+font-size: 17px;
+`;
 
 export default class Me extends React.Component {
     constructor(props) {
@@ -47,7 +66,7 @@ export default class Me extends React.Component {
     }
 
 
-    logOut(){
+    logOut() {
         window.localStorage.removeItem("token");
         window.location.href = "/";
     }
@@ -58,8 +77,8 @@ export default class Me extends React.Component {
     }
 
 
-    toggleDropdown(){
-        this.setState({dropdown: !this.state.dropdown})
+    toggleDropdown() {
+        this.setState({dropdown: !this.state.dropdown});
     }
 
 
@@ -78,11 +97,13 @@ export default class Me extends React.Component {
                     </UserName>
 
                     {this.state.dropdown === true && <Dropdown right="0" top="30px" dismiss={this.toggleDropdown}>
-                        <MenuItem onClick={this.logOut}>Log out</MenuItem>
-                    </Dropdown> }
-                </Container>)
+                        <MenuLink to="/profile"><MenuItem><Icon icon={faPen} fixedWidth/>&nbsp;Edit
+                            Profile</MenuItem></MenuLink>
+                        <MenuItem onClick={this.logOut}><Icon icon={faSignOutAlt} fixedWidth/>&nbsp;Log out</MenuItem>
+                    </Dropdown>}
+                </Container>);
         } else {
-            return <Container/>
+            return <Container/>;
         }
     }
 }

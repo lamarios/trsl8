@@ -8,7 +8,7 @@ import {NavLink} from "react-router-dom";
 import {fadeInLeft} from "./animations";
 import NavBar from "./navBar/NavBar";
 
-const LoginForm = styled.div`
+const LoginForm = styled.form`
 animation: ${fadeInLeft} 0.25s ease-out;
 `;
 const SignUpLink = styled(NavLink)``;
@@ -34,7 +34,8 @@ export default class Login extends React.Component {
     }
 
 
-    login() {
+    login(e) {
+        e.preventDefault();
         let login = {email: this.state.email, password: this.state.password};
 
 
@@ -49,9 +50,9 @@ export default class Login extends React.Component {
 
     render() {
         return (<Fragment>
-            <NavBar titleOnly={true} />
+            <NavBar titleOnly={true}/>
             <Container>
-                <LoginForm>
+                <LoginForm onSubmit={this.login}>
                     <Title>Sign In</Title>
                     <div>
                         <div>
@@ -66,7 +67,7 @@ export default class Login extends React.Component {
                         </div>
 
                         {this.state.error.length > 0 && <p>Not matching</p>}
-                        <PrimaryButton onClick={this.login}>Login</PrimaryButton>
+                        <PrimaryButton>Login</PrimaryButton>
                         <p>Don't have an account ? <SignUpLink to="/sign-up">Sign up !</SignUpLink></p>
                     </div>
                 </LoginForm>

@@ -10,8 +10,9 @@ const Button = styled.button`
   cursor:pointer;
   padding: 7px 12px;
   transition: all 0.25s ease-in; 
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   
   &:hover{
     background-color: ${props =>props.theme.colors.primary.lightest};

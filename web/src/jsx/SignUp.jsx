@@ -7,7 +7,7 @@ import TextInput from "./basic/TextInput";
 import {fadeInLeft} from "./animations";
 import NavBar from "./navBar/NavBar";
 
-const SetUp = styled.div`
+const SetUp = styled.form`
      color: ${props => props.theme.colors.text.primary};    
     animation: ${fadeInLeft} 0.25s ease-out;
     `;
@@ -41,7 +41,7 @@ export default class SignUp extends React.Component {
     }
 
     save(e) {
-
+        e.preventDefault();
         if (this.state.password.length === 0) {
             this.setState({error: "Passwords can't be empty"});
         } else if (!this.state.passwordsMatch) {
@@ -64,7 +64,7 @@ export default class SignUp extends React.Component {
         return (<Fragment>
             <NavBar titleOnly={true}/>
             <Container>
-                <SetUp>
+                <SetUp onSubmit={this.save}>
                     <Title>Sign Up</Title>
                     <div>
                         <TextInput label="Email" id="email" type="email" value={this.state.email}
@@ -94,7 +94,7 @@ export default class SignUp extends React.Component {
                                    })}/>
                     </div>
                     {this.state.error.length > 0 && <p>{this.state.error}</p>}
-                    <PrimaryButton onClick={this.save}>Save</PrimaryButton>
+                    <PrimaryButton>Save</PrimaryButton>
                 </SetUp>
             </Container>
         </Fragment>);
