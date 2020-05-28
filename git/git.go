@@ -278,7 +278,7 @@ func PullPushAllProjectsLoop() {
 	}
 }
 
-func GetRepoHistory(project dao.Project) ([]Commit, error) {
+func GetRepoHistory(project dao.Project, page int, pageSize int) ([]Commit, error) {
 	r, err := git.PlainOpen(GetRepoRoot(project))
 	if err != nil {
 		return nil, err
@@ -295,18 +295,30 @@ func GetRepoHistory(project dao.Project) ([]Commit, error) {
 		return nil, err
 	}
 
-	commits := make([]Commit, 10)
+	commits := make([]Commit, 0)
 	// ... just iterates over the commits, printing it
+
+	i := 0
+	from := page * pageSize
+	to := from + pageSize
 	err = cIter.ForEach(func(c *object.Commit) error {
-		fmt.Println(c)
-		commit := Commit{
-			Type:    plumbing.CommitObject.String(),
-			Commit:  c.Hash.String(),
-			Author:  c.Author.String(),
-			Date:    c.Author.When.Format("Mon Jan 02 15:04:05 2006 -0700"),
-			Message: c.Message,
+		if i >= from && i < to {
+			fmt.Println(c)
+			commit := Commit{
+				Type:    plumbing.CommitObject.String(),
+				Commit:  c.Hash.String(),
+				Author:  c.Author.String(),
+				Date:    c.Author.When.Format("Mon Jan 02 15:04:05 2006 -0700"),
+				Message: c.Message,
+			}
+
+			if len(commit.Type) > 0 || len(commit.Commit) > 0 || len(commit.Author) > 0 || len(commit.Date) > 0 || len(commit.Message) > 0 {
+				commits = append(commits, commit)
+				i++
+			}
+		} else {
+			i++
 		}
-		commits = append(commits, commit)
 		return nil
 	})
 

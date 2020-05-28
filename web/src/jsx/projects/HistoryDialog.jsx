@@ -6,6 +6,8 @@ import SlideLeftContainer from "../basic/SlideLeftContainer";
 import Loading from "../basic/Loading";
 import Table from "../basic/Table";
 import styled from "styled-components";
+import PrimaryButton from "../basic/PrimaryButton";
+import CenteredContainer from "../basic/CenteredContainer";
 
 const CustomDialog = styled(Dialog)`
 background-color: rebeccapurple;
@@ -30,14 +32,30 @@ const HistoryTable = styled(Table)`
 const HistoryDialog = (props) => {
     const [history, setHistory] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
+    const pageSize = 100;
+    useEffect(() => getProjectHistory(page), []);
 
-    useEffect(() => {
-        service.getProjectHistory(props.projectId)
+
+    const loadNewPage = () => {
+        const newPage = page + 1;
+        setPage(newPage);
+        getProjectHistory(newPage);
+    };
+
+    const getProjectHistory = (page) => {
+        setLoading(true)
+        service.getProjectHistory(props.projectId, page, pageSize)
             .then(res => {
                 setLoading(false);
-                setHistory(res.filter(h => h.author.length > 0 || h.commit.length > 0 || h.message.length > 0 || h.date.length > 0 || h.type.length > 0));
+                const newHistory = history.concat(res);
+                setHistory(newHistory);
+                console.log("res", res.length);
+                setHasMore(res.length === pageSize);
+
             });
-    }, []);
+    };
 
     return <CustomDialog dismiss={props.dismiss} cancelText="Close" dialogWidth="90vw">
         <Title>History</Title>
@@ -54,7 +72,7 @@ const HistoryDialog = (props) => {
                 </tr>
                 </thead>
                 <tbody>
-                {history.map(h => <tr key={h.commit}>
+                {history.map((h, i) => <tr key={i}>
                     <td>{h.date}</td>
                     <td>{h.type}</td>
                     <td>{h.commit}</td>
@@ -64,9 +82,15 @@ const HistoryDialog = (props) => {
                 </tbody>
             </HistoryTable>
         </SlideLeftContainer>}
-        {loading && <SlideLeftContainer>
-            <Loading/>
-        </SlideLeftContainer>}
+        {hasMore && <CenteredContainer>
+            <PrimaryButton onClick={loadNewPage}>Load more...</PrimaryButton>
+        </CenteredContainer>}
+
+        {loading && <CenteredContainer>
+            <SlideLeftContainer>
+                <Loading/>
+            </SlideLeftContainer>
+        </CenteredContainer>}
     </CustomDialog>;
 };
 

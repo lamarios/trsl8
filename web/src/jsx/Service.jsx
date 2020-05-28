@@ -213,8 +213,8 @@ export default class Service {
      * @param id
      * @returns {Promise<Response>}
      */
-    getProjectHistory(id) {
-        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_HISTORY, id), {
+    getProjectHistory(id, page, pageSize) {
+        return fetch(sprintf(ENDPOINTS.API.PROJECTS.GET_HISTORY+'?page='+page+'&pageSize='+pageSize, id), {
             headers: {
                 "Authorization": this.checkLocalStorage()
             }

@@ -669,7 +669,25 @@ func GetProjectHistory(user dao.UserFull, w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	history, err := git.GetRepoHistory(project)
+	page := 0
+	pageSize := 100
+
+	pages := r.URL.Query()["page"]
+	pageSizes := r.URL.Query()["pageSize"]
+
+	if len(pages) == 1 {
+		if n, err := strconv.Atoi(pages[0]); err == nil {
+			page = n
+		}
+	}
+
+	if len(pageSizes) == 1 {
+		if n, err := strconv.Atoi(pageSizes[0]); err == nil {
+			pageSize = n
+		}
+	}
+
+	history, err := git.GetRepoHistory(project, page, pageSize)
 	if err != nil {
 		WebError(w, err, 500, "")
 		return

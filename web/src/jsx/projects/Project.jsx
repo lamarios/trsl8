@@ -6,7 +6,7 @@ import Pagination from "../basic/Pagination";
 import PrimaryButton from "../basic/PrimaryButton";
 import OkDialog from "../basic/OkDialog";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faPlus, faHistory} from "@fortawesome/free-solid-svg-icons";
+import {faHistory, faPlus} from "@fortawesome/free-solid-svg-icons";
 import NewLanguageDialog from "./NewLanguageDialog";
 import ProjectUsers from "./ProjectUsers";
 import StringCell from "./StringCell";
@@ -370,6 +370,10 @@ export default class Project extends React.Component {
                                 itemCount={this.state.total} pageSize={this.state.pageSize}/>
                 </TableContainer>
                 }
+                {(!terms || terms.length === 0) && <div>
+                    <p>No terms found</p>
+                    <CreateNewTerm onNewTerm={this.getStrings} project={this.state.project}/>
+                </div>}
             </div>}
 
             {this.state.showError && <OkDialog dismiss={() => this.setState({showError: false})}>
